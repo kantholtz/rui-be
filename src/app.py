@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 from src.taxonomy import root_symptoms, add_symptom
 from src.json_encoder import JsonEncoder
@@ -8,6 +9,8 @@ from src.json_encoder import JsonEncoder
 #
 
 app = Flask(__name__)
+
+CORS(app)
 
 app.json_encoder = JsonEncoder
 
