@@ -19,4 +19,4 @@ class JsonEncoder(JSONEncoder):
             }
 
         else:
-            return super(JsonEncoder, self).default(obj)
+            return super().default(obj)

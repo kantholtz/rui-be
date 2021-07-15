@@ -32,9 +32,3 @@ def add_symptom(parent: Optional[Symptom], name: str) -> Symptom:
     lookup_symptoms[symptom.id] = symptom
 
     return symptom
-
-
-cat_a = add_symptom(None, 'Cat A')
-cat_a_1 = add_symptom(cat_a, 'Cat A.1')
-cat_a_2 = add_symptom(cat_a, 'Cat A.2')
-cat_b = add_symptom(None, 'Cat B')
