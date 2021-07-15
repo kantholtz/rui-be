@@ -2,7 +2,7 @@ from typing import Dict
 
 from flask.json import JSONEncoder
 
-from taxonomy import Symptom
+from src.taxonomy import Symptom
 
 
 class JsonEncoder(JSONEncoder):
