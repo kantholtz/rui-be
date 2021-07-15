@@ -6,10 +6,10 @@ from src.taxonomy import Symptom
 
 
 class JsonEncoder(JSONEncoder):
-    def default(self, object_: any) -> Dict:
+    def default(self, obj: any) -> Dict:
 
-        if isinstance(object_, Symptom):
-            symptom: Symptom = object_
+        if isinstance(obj, Symptom):
+            symptom: Symptom = obj
 
             return {
                 'id': symptom.id,
@@ -19,4 +19,4 @@ class JsonEncoder(JSONEncoder):
             }
 
         else:
-            return super(JsonEncoder, self).default(object_)
+            return super(JsonEncoder, self).default(obj)

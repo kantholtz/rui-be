@@ -1,7 +1,7 @@
 from flask import Flask
 
-from taxonomy import root_symptoms
-from json_encoder import JsonEncoder
+from src.taxonomy import root_symptoms
+from src.json_encoder import JsonEncoder
 
 app = Flask(__name__)
 
