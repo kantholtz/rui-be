@@ -31,15 +31,20 @@ cat_b = add_symptom(None, 'Cat B')
 #
 
 @app.route('/')
-def hello_world():
+def get_root():
+    return 'Server is up'
+
+
+@app.route('/api/1.0.0/symptoms', methods=['GET'])
+def get_symptoms():
     return {'taxonomy': root_symptoms}
 
 
-@app.route('/api/1.0.0/symptoms', methods=['POST'])
-def post_symptom():
-    data = request.get_json()
+@app.route('/api/1.0.0/symptom', methods=['POST'])
+def post_symptoms():
+    symptom = request.get_json()
 
-    created_symptom = taxonomy.add_symptom(None, data['name'])
+    created_symptom = taxonomy.add_symptom(None, symptom['name'])
 
     return jsonify(created_symptom), 201
 
