@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, request, make_response, jsonify
 from flask_cors import CORS
 
-from src.taxonomy import root_symptoms, add_symptom
+from src import taxonomy
+from src.taxonomy import root_symptoms, add_symptom, Symptom
 from src.json_encoder import JsonEncoder
 
 #
@@ -32,6 +33,15 @@ cat_b = add_symptom(None, 'Cat B')
 @app.route('/')
 def hello_world():
     return {'taxonomy': root_symptoms}
+
+
+@app.route('/api/1.0.0/symptoms', methods=['POST'])
+def post_symptom():
+    data = request.get_json()
+
+    created_symptom = taxonomy.add_symptom(None, data['name'])
+
+    return jsonify(created_symptom), 201
 
 
 #
