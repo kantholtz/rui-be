@@ -32,3 +32,17 @@ def add_symptom(parent: Optional[Symptom], name: str) -> Symptom:
     lookup_symptoms[symptom.id] = symptom
 
     return symptom
+
+
+def delete_symptom(symptom_id: int) -> Symptom:
+    symptom = lookup_symptoms[symptom_id]
+
+    for child in symptom.children:
+        delete_symptom(child.id)
+
+    if symptom.parent:
+        symptom.parent.children.remove(symptom)
+    else:
+        root_symptoms.remove(symptom)
+
+    return symptom

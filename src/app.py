@@ -1,4 +1,6 @@
-from flask import Flask, request, make_response, jsonify
+from typing import Dict, Tuple
+
+from flask import Flask, request, make_response, jsonify, Response
 from flask_cors import CORS
 
 from src import taxonomy
@@ -36,17 +38,24 @@ def get_root():
 
 
 @app.route('/api/1.0.0/symptoms', methods=['GET'])
-def get_symptoms():
+def get_symptoms() -> Dict:
     return {'taxonomy': root_symptoms}
 
 
 @app.route('/api/1.0.0/symptom', methods=['POST'])
-def post_symptoms():
+def post_symptom() -> Tuple[Response, int]:
     symptom = request.get_json()
 
     created_symptom = taxonomy.add_symptom(None, symptom['name'])
 
     return jsonify(created_symptom), 201
+
+
+@app.route('/api/1.0.0/symptom/<int:symptom_id>', methods=['DELETE'])
+def delete_symptom(symptom_id: int) -> Response:
+    symptom = taxonomy.delete_symptom(symptom_id)
+
+    return jsonify(symptom)
 
 
 #
