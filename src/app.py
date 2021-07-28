@@ -54,8 +54,8 @@ def post_symptom() -> Tuple[Response, int]:
     return jsonify(created_symptom), 201
 
 
-@app.route('/api/1.0.0/symptom/<int:symptom_id>', methods=['PATCH'])
-def patch_symptom(symptom_id: int) -> Response:
+@app.route('/api/1.0.0/symptom', methods=['PATCH'])
+def patch_symptom() -> Response:
 
     data: Dict = request.get_json()
 
