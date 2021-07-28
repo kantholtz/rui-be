@@ -15,7 +15,11 @@ class Symptom:
 root_symptoms: List[Symptom] = []
 lookup_symptoms: Dict[int, Symptom] = {}
 
-next_id = 0
+next_id = 1
+
+
+def get_symptoms() -> List[Symptom]:
+    return root_symptoms
 
 
 def add_symptom(parent: Optional[Symptom], name: str) -> Symptom:
@@ -30,6 +34,14 @@ def add_symptom(parent: Optional[Symptom], name: str) -> Symptom:
         root_symptoms.append(symptom)
 
     lookup_symptoms[symptom.id] = symptom
+
+    return symptom
+
+
+def update_symptom(symptom_id: int, new_name: str) -> Symptom:
+    symptom = lookup_symptoms[symptom_id]
+
+    symptom.name = new_name
 
     return symptom
 

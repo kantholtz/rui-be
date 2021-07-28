@@ -1,11 +1,11 @@
 from typing import Dict, Tuple
 
-from flask import Flask, request, make_response, jsonify, Response
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 
 from src import taxonomy
-from src.taxonomy import root_symptoms, add_symptom, Symptom
 from src.json_encoder import JsonEncoder
+from src.taxonomy import add_symptom, Symptom
 
 #
 # Set up app object
@@ -25,6 +25,7 @@ app.json_encoder = JsonEncoder
 cat_a = add_symptom(None, 'Cat A')
 cat_a_1 = add_symptom(cat_a, 'Cat A.1')
 cat_a_2 = add_symptom(cat_a, 'Cat A.2')
+cat_a_2_1 = add_symptom(cat_a_2, 'Cat A.2.1')
 cat_b = add_symptom(None, 'Cat B')
 
 
@@ -39,16 +40,31 @@ def get_root():
 
 @app.route('/api/1.0.0/symptoms', methods=['GET'])
 def get_symptoms() -> Dict:
-    return {'taxonomy': root_symptoms}
+    return {'taxonomy': taxonomy.get_symptoms()}
 
 
 @app.route('/api/1.0.0/symptom', methods=['POST'])
 def post_symptom() -> Tuple[Response, int]:
-    symptom = request.get_json()
 
-    created_symptom = taxonomy.add_symptom(None, symptom['name'])
+    data: Dict = request.get_json()
+    parent: Symptom = taxonomy.lookup_symptoms[data['parent']] if data['parent'] else None
+
+    created_symptom = taxonomy.add_symptom(parent, data['name'])
 
     return jsonify(created_symptom), 201
+
+
+@app.route('/api/1.0.0/symptom/<int:symptom_id>', methods=['PATCH'])
+def patch_symptom(symptom_id: int) -> Response:
+
+    data: Dict = request.get_json()
+
+    id = data['id']
+    new_name = data['name']
+
+    patched_symptom = taxonomy.update_symptom(id, new_name)
+
+    return jsonify(patched_symptom)
 
 
 @app.route('/api/1.0.0/symptom/<int:symptom_id>', methods=['DELETE'])

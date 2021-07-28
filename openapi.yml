@@ -1,0 +1,105 @@
+openapi: 3.0.0
+
+info:
+  description: API for the RUI backend
+  version: "1.0.0"
+  title: RUI
+  contact:
+    email: tobias.uhmann@gmail.com
+
+tags:
+  - name: symptom
+    description: Everything about symptoms
+
+paths:
+
+  /symptoms:
+
+    get:
+      tags:
+        - symptom
+      summary: Get all root symptoms, including their deeply populated children
+      operationId: getSymptoms
+      responses:
+        '200':
+          description: Got root symptoms successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Symptom'
+
+  /symptom:
+
+    post:
+      tags:
+        - symptom
+      summary: Create a new symptom. The ID and child symtpoms are ignored.
+      operationId: postSymptom
+      responses:
+        '201':
+          description: Created symptom
+      requestBody:
+        $ref: '#/components/requestBodies/Symptom'
+
+    patch:
+      tags:
+        - symptom
+      summary: Patch a symptom. Only the name can be updated.
+      operationId: patchSymptom
+      responses:
+        '200':
+          description: Patched symptom
+      requestBody:
+        $ref: '#/components/requestBodies/Symptom'
+
+  '/symptom/{symptomId}':
+
+    delete:
+      tags:
+        - symptom
+      summary: Delete a symptom. Child symptoms are deleted recursively.
+      operationId: deleteSymptom
+      parameters:
+        - name: symptomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Symptom not found
+
+components:
+
+  schemas:
+
+    Symptom:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Short circuit
+        parent:
+          type: integer
+          format: int64
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Symptom'
+
+  requestBodies:
+
+    Symptom:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Symptom'
