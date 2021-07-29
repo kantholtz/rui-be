@@ -56,21 +56,6 @@ def get_root():
     return 'Server is up'
 
 
-@app.route('/api/1.0.0/symptoms', methods=['GET'])
-def get_symptoms() -> Dict:
-    return {'taxonomy': taxonomy.get_symptoms()}
-
-
-@app.route('/api/1.0.0/old_symptom', methods=['POST'])
-def post_old_symptom() -> Tuple[Response, int]:
-    data: Dict = request.get_json()
-    parent: OldSymptom = taxonomy.lookup_symptoms[data['parent']] if data['parent'] else None
-
-    created_symptom = taxonomy.add_symptom(parent, data['name'])
-
-    return jsonify(created_symptom), 201
-
-
 @app.route('/api/1.0.0/symptom', methods=['PATCH'])
 def patch_symptom() -> Response:
     data: Dict = request.get_json()

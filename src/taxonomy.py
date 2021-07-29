@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 
 @dataclass
@@ -16,26 +16,6 @@ root_symptoms: List[OldSymptom] = []
 lookup_symptoms: Dict[int, OldSymptom] = {}
 
 next_id = 1
-
-
-def get_symptoms() -> List[OldSymptom]:
-    return root_symptoms
-
-
-def add_symptom(parent: Optional[OldSymptom], name: str) -> OldSymptom:
-    global next_id
-
-    symptom = OldSymptom(next_id, name, parent, [])
-    next_id = next_id + 1
-
-    if parent:
-        parent.children.append(symptom)
-    else:
-        root_symptoms.append(symptom)
-
-    lookup_symptoms[symptom.id] = symptom
-
-    return symptom
 
 
 def update_symptom(symptom_id: int, new_name: str) -> OldSymptom:
