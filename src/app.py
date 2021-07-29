@@ -105,33 +105,6 @@ class DeepSymptom:
     child_symptoms: List
 
 
-@app.route('/api/1.0.0/symptom', methods=['POST'])
-def post_symptom() -> Tuple[str, int]:
-    request_data: Dict = request.get_json()
-
-    symptom = Symptom(id=request_data['id'],
-                      parent=request_data['parent'],
-                      names=request_data['names'])
-
-    next_id = max(tax.nxg.nodes) + 1
-    tax.nxg.add_nodes_from([(next_id, {'tid': '', 'names': symptom.names})])
-
-    parent = symptom.parent
-
-    if parent:
-        tax.nxg.add_edges_from([
-            (parent, next_id, RELATIONS['child']),
-            (next_id, parent, RELATIONS['parent']),
-            (next_id, next_id, RELATIONS['synonym'])
-        ])
-    else:
-        tax.nxg.add_edges_from([
-            (next_id, next_id, RELATIONS['synonym'])
-        ])
-
-    return '', 201
-
-
 @app.route('/api/1.0.0/taxonomy', methods=['GET'])
 def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
     global tax
@@ -179,18 +152,45 @@ def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
 def put_taxonomy() -> Tuple[str, int]:
     global tax
 
-    metaYml: FileStorage = request.files['metaYml']
-    nodesTxt: FileStorage = request.files['nodesTxt']
-    edgesTxt: FileStorage = request.files['edgesTxt']
+    meta_yml: FileStorage = request.files['metaYml']
+    nodes_txt: FileStorage = request.files['nodesTxt']
+    edges_txt: FileStorage = request.files['edgesTxt']
 
-    meta = yaml.load(metaYml.stream, Loader=yaml.FullLoader)
+    meta_dict = yaml.load(meta_yml.stream, Loader=yaml.FullLoader)
 
-    str_nodes = (line.split(b' ', maxsplit=1) for line in nodesTxt.stream)
+    str_nodes = (line.split(b' ', maxsplit=1) for line in nodes_txt.stream)
     nodes = ((int(node_id), eval(data)) for node_id, data in str_nodes)
 
-    triples = (tuple(map(int, line.split())) for line in edgesTxt.stream)
+    triples = (tuple(map(int, line.split())) for line in edges_txt.stream)
 
-    tax = Tax.load_from_memory(meta, nodes, triples)
+    tax = Tax.load_from_memory(meta_dict, nodes, triples)
+
+    return '', 201
+
+
+@app.route('/api/1.0.0/symptom', methods=['POST'])
+def post_symptom() -> Tuple[str, int]:
+    request_data: Dict = request.get_json()
+
+    symptom = Symptom(id=request_data['id'],
+                      parent=request_data['parent'],
+                      names=request_data['names'])
+
+    next_id = max(tax.nxg.nodes) + 1
+    tax.nxg.add_nodes_from([(next_id, {'tid': '', 'names': symptom.names})])
+
+    parent = symptom.parent
+
+    if parent:
+        tax.nxg.add_edges_from([
+            (parent, next_id, RELATIONS['child']),
+            (next_id, parent, RELATIONS['parent']),
+            (next_id, next_id, RELATIONS['synonym'])
+        ])
+    else:
+        tax.nxg.add_edges_from([
+            (next_id, next_id, RELATIONS['synonym'])
+        ])
 
     return '', 201
 
