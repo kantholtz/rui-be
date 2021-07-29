@@ -1,12 +1,13 @@
 from typing import Dict, Tuple
 
+from draug.homag.tax import Tax
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from werkzeug.datastructures import FileStorage
 
 from src import taxonomy
 from src.json_encoder import JsonEncoder
-from src.taxonomy import add_symptom, Symptom
+from src.taxonomy import Symptom
 
 #
 # Set up app object
@@ -20,14 +21,33 @@ app.config['JSON_SORT_KEYS'] = False  # Simplify debugging in frontend
 app.json_encoder = JsonEncoder
 
 #
+# Create taxonomy
+#
+
+RELATIONS = {
+    'parent': 0,
+    'child': 1,
+    'synonym': 2,
+}
+
+meta = {
+    'name': 'symptax.v4',
+    'reflexive': (RELATIONS['synonym'],),
+    'inverse': {RELATIONS['parent']: RELATIONS['child']},
+    'relmap': {rid: name for name, rid in RELATIONS.items()}
+}
+
+tax = Tax(meta)
+
+#
 # Seed taxonomy
 #
 
-cat_a = add_symptom(None, 'Cat A')
-cat_a_1 = add_symptom(cat_a, 'Cat A.1')
-cat_a_2 = add_symptom(cat_a, 'Cat A.2')
-cat_a_2_1 = add_symptom(cat_a_2, 'Cat A.2.1')
-cat_b = add_symptom(None, 'Cat B')
+# cat_a = add_symptom(None, 'Cat A')
+# cat_a_1 = add_symptom(cat_a, 'Cat A.1')
+# cat_a_2 = add_symptom(cat_a, 'Cat A.2')
+# cat_a_2_1 = add_symptom(cat_a_2, 'Cat A.2.1')
+# cat_b = add_symptom(None, 'Cat B')
 
 
 #
