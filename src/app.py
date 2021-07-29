@@ -91,8 +91,8 @@ def put_taxonomy() -> Tuple[str, int]:
 
     meta = yaml.load(metaYml.stream, Loader=yaml.FullLoader)
 
-    node_id_data_list = (line.split(' ', maxsplit=1) for line in nodesTxt.stream.readlines())
-    nodes = (int(node_id), eval(data) for node_id, data in node_id_data_list)
+    str_nodes = (line.split(b' ', maxsplit=1) for line in nodesTxt.stream)
+    nodes = ((int(node_id), eval(data)) for node_id, data in str_nodes)
 
     triples = (tuple(map(int, line.split())) for line in edgesTxt.stream)
 
