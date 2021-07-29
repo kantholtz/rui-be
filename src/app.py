@@ -92,9 +92,34 @@ def delete_symptom(symptom_id: int) -> Response:
 
 @dataclass
 class NewSymptom:
-    id: str
+    id: int
     names: List[str]
     child_symptoms: List
+
+
+@app.route('/api/1.0.0/new_symptom', methods=['POST'])
+def post_new_symptom() -> Tuple[str, int]:
+    request_data: Dict = request.get_json()
+
+    parent = request_data['parent']
+    names = request_data['names']
+
+    new_node = max(tax.nxg.nodes) + 1
+
+    tax.nxg.add_nodes_from([(new_node, {'tid': '', 'names': names})])
+
+    if parent:
+        tax.nxg.add_edges_from([
+            (parent, new_node, RELATIONS['child']),
+            (new_node, parent, RELATIONS['parent']),
+            (new_node, new_node, RELATIONS['synonym'])
+        ])
+    else:
+        tax.nxg.add_edges_from([
+            (new_node, new_node, RELATIONS['synonym'])
+        ])
+
+    return '', 201
 
 
 @app.route('/api/1.0.0/taxonomy', methods=['GET'])
@@ -123,13 +148,11 @@ def get_taxonomy() -> Dict[str, List[NewSymptom]]:
     #
 
     def node_to_symptom(node: int) -> NewSymptom:
-        node_data = tax.nxg.nodes[node]
-
         children = [neighbor for neighbor, edge_props in tax.nxg[node].items()
                     if RELATIONS['child'] in edge_props]
 
-        return NewSymptom(id=node_data['tid'],
-                          names=node_data['names'],
+        return NewSymptom(id=node,
+                          names=tax.nxg.nodes[node]['names'],
                           child_symptoms=[node_to_symptom(child) for child in children])
 
     return {'root_symptoms': [node_to_symptom(root_node) for root_node in root_nodes]}
