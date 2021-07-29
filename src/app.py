@@ -1,5 +1,6 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
+import yaml
 from draug.homag.tax import Tax
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
@@ -24,20 +25,7 @@ app.json_encoder = JsonEncoder
 # Create taxonomy
 #
 
-RELATIONS = {
-    'parent': 0,
-    'child': 1,
-    'synonym': 2,
-}
-
-meta = {
-    'name': 'symptax.v4',
-    'reflexive': (RELATIONS['synonym'],),
-    'inverse': {RELATIONS['parent']: RELATIONS['child']},
-    'relmap': {rid: name for name, rid in RELATIONS.items()}
-}
-
-tax = Tax(meta)
+tax: Tax
 
 #
 # Seed taxonomy
@@ -94,13 +82,23 @@ def delete_symptom(symptom_id: int) -> Response:
 
 
 @app.route('/api/1.0.0/taxonomy', methods=['PUT'])
-def put_taxonomy() -> Tuple[Response, int]:
+def put_taxonomy() -> Tuple[str, int]:
+    global tax
+
+    metaYml: FileStorage = request.files['metaYml']
     nodesTxt: FileStorage = request.files['nodesTxt']
     edgesTxt: FileStorage = request.files['edgesTxt']
-    metaYml: FileStorage = request.files['metaYml']
 
-    nodesTxt.stream.readlines()
+    meta = yaml.load(metaYml.stream, Loader=yaml.FullLoader)
 
+    node_id_data_list = (line.split(' ', maxsplit=1) for line in nodesTxt.stream.readlines())
+    nodes = (int(node_id), eval(data) for node_id, data in node_id_data_list)
+
+    triples = (tuple(map(int, line.split())) for line in edgesTxt.stream)
+
+    tax = Tax.load_from_memory(meta, nodes, triples)
+
+    return '', 201
 
 #
 # Run server
