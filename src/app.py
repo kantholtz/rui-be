@@ -9,7 +9,6 @@ from werkzeug.datastructures import FileStorage
 
 from src import taxonomy
 from src.json_encoder import JsonEncoder
-from src.taxonomy import OldSymptom
 
 #
 # Set up app object
@@ -56,18 +55,6 @@ def get_root():
     return 'Server is up'
 
 
-@app.route('/api/1.0.0/symptom', methods=['PATCH'])
-def patch_symptom() -> Response:
-    data: Dict = request.get_json()
-
-    symptom_id = data['id']
-    new_name = data['name']
-
-    patched_symptom = taxonomy.update_symptom(symptom_id, new_name)
-
-    return jsonify(patched_symptom)
-
-
 @app.route('/api/1.0.0/symptom/<int:symptom_id>', methods=['DELETE'])
 def delete_symptom(symptom_id: int) -> Response:
     symptom = taxonomy.delete_symptom(symptom_id)
@@ -90,22 +77,17 @@ class DeepSymptom:
     child_symptoms: List
 
 
+def get_parent(node: int) -> Optional[int]:
+    parents = [neighbor for neighbor, edge_props in tax.nxg[node].items()
+               if RELATIONS['parent'] in edge_props]
+
+    assert len(parents) <= 1
+
+    return parents[0] if len(parents) == 1 else None
+
+
 @app.route('/api/1.0.0/taxonomy', methods=['GET'])
 def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
-    global tax
-
-    def get_parent(node: int) -> Optional[int]:
-        parents = [neighbor for neighbor, edge_props in tax.nxg[node].items()
-                   if RELATIONS['parent'] in edge_props]
-
-        assert len(parents) <= 1
-
-        return parents[0] if len(parents) == 1 else None
-
-    def get_children(node: int) -> List[int]:
-        return [neighbor for neighbor, edge_props in tax.nxg[node].items()
-                if RELATIONS['child'] in edge_props]
-
     #
     # Determine root nodes
     #
@@ -123,6 +105,10 @@ def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
     #
     # Build and return list of recusively populated symptoms
     #
+
+    def get_children(node: int) -> List[int]:
+        return [neighbor for neighbor, edge_props in tax.nxg[node].items()
+                if RELATIONS['child'] in edge_props]
 
     def node_to_symptom(node: int) -> DeepSymptom:
         return DeepSymptom(id=node,
@@ -169,15 +155,55 @@ def post_symptom() -> Tuple[str, int]:
     if parent:
         tax.nxg.add_edges_from([
             (parent, next_id, RELATIONS['child']),
-            (next_id, parent, RELATIONS['parent']),
-            (next_id, next_id, RELATIONS['synonym'])
-        ])
-    else:
-        tax.nxg.add_edges_from([
-            (next_id, next_id, RELATIONS['synonym'])
+            (next_id, parent, RELATIONS['parent'])
         ])
 
+    tax.nxg.add_edges_from([
+        (next_id, next_id, RELATIONS['synonym'])
+    ])
+
     return '', 201
+
+
+@app.route('/api/1.0.0/symptom', methods=['PUT'])
+def put_symptom() -> str:
+    request_data: Dict = request.get_json()
+
+    symptom = Symptom(id=request_data['id'],
+                      parent=request_data['parent'],
+                      names=request_data['names'])
+
+    node = symptom.id
+
+    #
+    # Disconnect from old parent
+    #
+
+    old_parent = get_parent(node)
+
+    if old_parent:
+        tax.nxg.remove_edge(old_parent, node)
+        tax.nxg.remove_edge(node, old_parent)
+
+    #
+    # Connect to new parent
+    #
+
+    new_parent = symptom.parent
+
+    if new_parent:
+        tax.nxg.add_edges_from([
+            (new_parent, node, RELATIONS['child']),
+            (node, new_parent, RELATIONS['parent']),
+        ])
+
+    #
+    # Set new names
+    #
+
+    tax.nxg.nodes[node]['names'] = symptom.names
+
+    return ''
 
 
 #

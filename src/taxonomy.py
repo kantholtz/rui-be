@@ -15,16 +15,6 @@ class OldSymptom:
 root_symptoms: List[OldSymptom] = []
 lookup_symptoms: Dict[int, OldSymptom] = {}
 
-next_id = 1
-
-
-def update_symptom(symptom_id: int, new_name: str) -> OldSymptom:
-    symptom = lookup_symptoms[symptom_id]
-
-    symptom.name = new_name
-
-    return symptom
-
 
 def delete_symptom(symptom_id: int) -> OldSymptom:
     symptom = lookup_symptoms[symptom_id]
