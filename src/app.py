@@ -105,7 +105,18 @@ def get_taxonomy() -> Dict[str, List[NewSymptom]]:
     # Determine root nodes
     #
 
-    root_nodes = [3]
+    def find_root(node: int) -> int:
+        parents = [neighbor for neighbor, edge_props in tax.nxg[node].items()
+                   if RELATIONS['parent'] in edge_props]
+
+        assert len(parents) <= 1
+
+        if len(parents) == 0:
+            return node
+        else:
+            return find_root(parents[0])
+
+    root_nodes = {find_root(node) for node in tax.nxg.nodes}
 
     #
     # Build and return list of recusively populated symptoms
