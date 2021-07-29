@@ -2,6 +2,7 @@ from typing import Dict, Tuple
 
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
+from werkzeug.datastructures import FileStorage
 
 from src import taxonomy
 from src.json_encoder import JsonEncoder
@@ -45,7 +46,6 @@ def get_symptoms() -> Dict:
 
 @app.route('/api/1.0.0/symptom', methods=['POST'])
 def post_symptom() -> Tuple[Response, int]:
-
     data: Dict = request.get_json()
     parent: Symptom = taxonomy.lookup_symptoms[data['parent']] if data['parent'] else None
 
@@ -56,13 +56,12 @@ def post_symptom() -> Tuple[Response, int]:
 
 @app.route('/api/1.0.0/symptom', methods=['PATCH'])
 def patch_symptom() -> Response:
-
     data: Dict = request.get_json()
 
-    id = data['id']
+    symptom_id = data['id']
     new_name = data['name']
 
-    patched_symptom = taxonomy.update_symptom(id, new_name)
+    patched_symptom = taxonomy.update_symptom(symptom_id, new_name)
 
     return jsonify(patched_symptom)
 
@@ -72,6 +71,15 @@ def delete_symptom(symptom_id: int) -> Response:
     symptom = taxonomy.delete_symptom(symptom_id)
 
     return jsonify(symptom)
+
+
+@app.route('/api/1.0.0/taxonomy', methods=['PUT'])
+def put_taxonomy() -> Tuple[Response, int]:
+    nodesTxt: FileStorage = request.files['nodesTxt']
+    edgesTxt: FileStorage = request.files['edgesTxt']
+    metaYml: FileStorage = request.files['metaYml']
+
+    nodesTxt.stream.readlines()
 
 
 #

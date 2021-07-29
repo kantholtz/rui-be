@@ -13,13 +13,13 @@ tags:
 
 paths:
 
-  /symptoms:
+  /symptom:
 
     get:
       tags:
         - symptom
-      summary: Get all root symptoms, including their deeply populated children
-      operationId: getSymptoms
+      summary: Get root symptoms
+      operationId: getSymptom
       responses:
         '200':
           description: Got root symptoms successfully
@@ -30,27 +30,14 @@ paths:
                 items:
                   $ref: '#/components/schemas/Symptom'
 
-  /symptom:
-
     post:
       tags:
         - symptom
-      summary: Create a new symptom. The ID and child symtpoms are ignored.
+      summary: Create symptom
       operationId: postSymptom
       responses:
         '201':
           description: Created symptom
-      requestBody:
-        $ref: '#/components/requestBodies/Symptom'
-
-    patch:
-      tags:
-        - symptom
-      summary: Patch a symptom. Only the name can be updated.
-      operationId: patchSymptom
-      responses:
-        '200':
-          description: Patched symptom
       requestBody:
         $ref: '#/components/requestBodies/Symptom'
 
@@ -59,7 +46,7 @@ paths:
     delete:
       tags:
         - symptom
-      summary: Delete a symptom. Child symptoms are deleted recursively.
+      summary: Delete symptom
       operationId: deleteSymptom
       parameters:
         - name: symptomId
@@ -74,6 +61,32 @@ paths:
         '404':
           description: Symptom not found
 
+  '/taxonomy':
+
+    put:
+      tags:
+        - symptom
+      summary: Overwrite the existing taxonomy
+      operationId: putTaxonomy
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                nodesTxt:
+                  type: string
+                  format: binary
+                edgesTxt:
+                  type: string
+                  format: binary
+                metaYml:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Updated
+
 components:
 
   schemas:
@@ -87,9 +100,6 @@ components:
         name:
           type: string
           example: Short circuit
-        parent:
-          type: integer
-          format: int64
         children:
           type: array
           items:
