@@ -1,7 +1,8 @@
+from dataclasses import dataclass
 from typing import Dict, Tuple, List
 
 import yaml
-from draug.homag.tax import Tax
+from draug.homag.tax import Tax, RELATIONS
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from werkzeug.datastructures import FileStorage
@@ -25,7 +26,15 @@ app.json_encoder = JsonEncoder
 # Create taxonomy
 #
 
-tax: Tax
+meta = {
+    'name': 'symptax.v4',
+    'reflexive': (RELATIONS['synonym'],),
+    'inverse': {RELATIONS['parent']: RELATIONS['child']},
+    'relmap': {rid: name for name, rid in RELATIONS.items()}
+}
+
+tax = Tax(meta)
+
 
 #
 # Seed taxonomy
@@ -81,6 +90,40 @@ def delete_symptom(symptom_id: int) -> Response:
     return jsonify(symptom)
 
 
+@dataclass
+class NewSymptom:
+    id: str
+    names: List[str]
+    child_symptoms: List
+
+
+@app.route('/api/1.0.0/taxonomy', methods=['GET'])
+def get_taxonomy() -> Dict[str, List[NewSymptom]]:
+    global tax
+
+    #
+    # Determine root nodes
+    #
+
+    root_nodes = [3]
+
+    #
+    # Build and return list of recusively populated symptoms
+    #
+
+    def node_to_symptom(node: int) -> NewSymptom:
+        node_data = tax.nxg.nodes[node]
+
+        children = [neighbor for neighbor, edge_props in tax.nxg[node].items()
+                    if RELATIONS['child'] in edge_props]
+
+        return NewSymptom(id=node_data['tid'],
+                          names=node_data['names'],
+                          child_symptoms=[node_to_symptom(child) for child in children])
+
+    return {'root_symptoms': [node_to_symptom(root_node) for root_node in root_nodes]}
+
+
 @app.route('/api/1.0.0/taxonomy', methods=['PUT'])
 def put_taxonomy() -> Tuple[str, int]:
     global tax
@@ -99,6 +142,7 @@ def put_taxonomy() -> Tuple[str, int]:
     tax = Tax.load_from_memory(meta, nodes, triples)
 
     return '', 201
+
 
 #
 # Run server
