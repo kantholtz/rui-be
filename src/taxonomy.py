@@ -3,7 +3,7 @@ from typing import List, Dict, Optional
 
 
 @dataclass
-class Symptom:
+class OldSymptom:
     id: int
 
     name: str
@@ -12,20 +12,20 @@ class Symptom:
     children: List  # List[Symptom]
 
 
-root_symptoms: List[Symptom] = []
-lookup_symptoms: Dict[int, Symptom] = {}
+root_symptoms: List[OldSymptom] = []
+lookup_symptoms: Dict[int, OldSymptom] = {}
 
 next_id = 1
 
 
-def get_symptoms() -> List[Symptom]:
+def get_symptoms() -> List[OldSymptom]:
     return root_symptoms
 
 
-def add_symptom(parent: Optional[Symptom], name: str) -> Symptom:
+def add_symptom(parent: Optional[OldSymptom], name: str) -> OldSymptom:
     global next_id
 
-    symptom = Symptom(next_id, name, parent, [])
+    symptom = OldSymptom(next_id, name, parent, [])
     next_id = next_id + 1
 
     if parent:
@@ -38,7 +38,7 @@ def add_symptom(parent: Optional[Symptom], name: str) -> Symptom:
     return symptom
 
 
-def update_symptom(symptom_id: int, new_name: str) -> Symptom:
+def update_symptom(symptom_id: int, new_name: str) -> OldSymptom:
     symptom = lookup_symptoms[symptom_id]
 
     symptom.name = new_name
@@ -46,7 +46,7 @@ def update_symptom(symptom_id: int, new_name: str) -> Symptom:
     return symptom
 
 
-def delete_symptom(symptom_id: int) -> Symptom:
+def delete_symptom(symptom_id: int) -> OldSymptom:
     symptom = lookup_symptoms[symptom_id]
 
     for child in symptom.children:

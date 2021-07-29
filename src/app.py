@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Optional
 
 import yaml
 from draug.homag.tax import Tax, RELATIONS
@@ -9,7 +9,7 @@ from werkzeug.datastructures import FileStorage
 
 from src import taxonomy
 from src.json_encoder import JsonEncoder
-from src.taxonomy import Symptom
+from src.taxonomy import OldSymptom
 
 #
 # Set up app object
@@ -61,10 +61,10 @@ def get_symptoms() -> Dict:
     return {'taxonomy': taxonomy.get_symptoms()}
 
 
-@app.route('/api/1.0.0/symptom', methods=['POST'])
-def post_symptom() -> Tuple[Response, int]:
+@app.route('/api/1.0.0/old_symptom', methods=['POST'])
+def post_old_symptom() -> Tuple[Response, int]:
     data: Dict = request.get_json()
-    parent: Symptom = taxonomy.lookup_symptoms[data['parent']] if data['parent'] else None
+    parent: OldSymptom = taxonomy.lookup_symptoms[data['parent']] if data['parent'] else None
 
     created_symptom = taxonomy.add_symptom(parent, data['name'])
 
@@ -91,55 +91,74 @@ def delete_symptom(symptom_id: int) -> Response:
 
 
 @dataclass
-class NewSymptom:
+class Symptom:
     id: int
+    parent: int
+    names: List[str]
+
+
+@dataclass
+class DeepSymptom:
+    id: int
+    parent: int
     names: List[str]
     child_symptoms: List
 
 
-@app.route('/api/1.0.0/new_symptom', methods=['POST'])
-def post_new_symptom() -> Tuple[str, int]:
+@app.route('/api/1.0.0/symptom', methods=['POST'])
+def post_symptom() -> Tuple[str, int]:
     request_data: Dict = request.get_json()
 
-    parent = request_data['parent']
-    names = request_data['names']
+    symptom = Symptom(id=request_data['id'],
+                      parent=request_data['parent'],
+                      names=request_data['names'])
 
-    new_node = max(tax.nxg.nodes) + 1
+    next_id = max(tax.nxg.nodes) + 1
+    tax.nxg.add_nodes_from([(next_id, {'tid': '', 'names': symptom.names})])
 
-    tax.nxg.add_nodes_from([(new_node, {'tid': '', 'names': names})])
+    parent = symptom.parent
 
     if parent:
         tax.nxg.add_edges_from([
-            (parent, new_node, RELATIONS['child']),
-            (new_node, parent, RELATIONS['parent']),
-            (new_node, new_node, RELATIONS['synonym'])
+            (parent, next_id, RELATIONS['child']),
+            (next_id, parent, RELATIONS['parent']),
+            (next_id, next_id, RELATIONS['synonym'])
         ])
     else:
         tax.nxg.add_edges_from([
-            (new_node, new_node, RELATIONS['synonym'])
+            (next_id, next_id, RELATIONS['synonym'])
         ])
 
     return '', 201
 
 
 @app.route('/api/1.0.0/taxonomy', methods=['GET'])
-def get_taxonomy() -> Dict[str, List[NewSymptom]]:
+def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
     global tax
+
+    def get_parent(node: int) -> Optional[int]:
+        parents = [neighbor for neighbor, edge_props in tax.nxg[node].items()
+                   if RELATIONS['parent'] in edge_props]
+
+        assert len(parents) <= 1
+
+        return parents[0] if len(parents) == 1 else None
+
+    def get_children(node: int) -> List[int]:
+        return [neighbor for neighbor, edge_props in tax.nxg[node].items()
+                if RELATIONS['child'] in edge_props]
 
     #
     # Determine root nodes
     #
 
     def find_root(node: int) -> int:
-        parents = [neighbor for neighbor, edge_props in tax.nxg[node].items()
-                   if RELATIONS['parent'] in edge_props]
+        parent = get_parent(node)
 
-        assert len(parents) <= 1
-
-        if len(parents) == 0:
-            return node
+        if parent:
+            return find_root(parent)
         else:
-            return find_root(parents[0])
+            return node
 
     root_nodes = {find_root(node) for node in tax.nxg.nodes}
 
@@ -147,13 +166,11 @@ def get_taxonomy() -> Dict[str, List[NewSymptom]]:
     # Build and return list of recusively populated symptoms
     #
 
-    def node_to_symptom(node: int) -> NewSymptom:
-        children = [neighbor for neighbor, edge_props in tax.nxg[node].items()
-                    if RELATIONS['child'] in edge_props]
-
-        return NewSymptom(id=node,
-                          names=tax.nxg.nodes[node]['names'],
-                          child_symptoms=[node_to_symptom(child) for child in children])
+    def node_to_symptom(node: int) -> DeepSymptom:
+        return DeepSymptom(id=node,
+                           parent=get_parent(node),
+                           names=tax.nxg.nodes[node]['names'],
+                           child_symptoms=get_children(node))
 
     return {'root_symptoms': [node_to_symptom(root_node) for root_node in root_nodes]}
 

@@ -2,14 +2,14 @@ from typing import Dict
 
 from flask.json import JSONEncoder
 
-from src.taxonomy import Symptom
+from src.taxonomy import OldSymptom
 
 
 class JsonEncoder(JSONEncoder):
     def default(self, obj: any) -> Dict:
 
-        if isinstance(obj, Symptom):
-            symptom: Symptom = obj
+        if isinstance(obj, OldSymptom):
+            symptom: OldSymptom = obj
 
             return {
                 'id': symptom.id,
