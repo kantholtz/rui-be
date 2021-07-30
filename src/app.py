@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Tuple, List, Optional
+from typing import Dict, Tuple, List
 
 import yaml
 from draug.homag.tax import Tax, RELATIONS
@@ -18,7 +18,7 @@ CORS(app)
 app.config['JSON_SORT_KEYS'] = False  # Simplify debugging in frontend
 
 #
-# Create taxonomy
+# Create initial taxonomy
 #
 
 meta = {
@@ -57,19 +57,19 @@ class DeepSymptom:
 
 @app.route('/api/1.1.0/taxonomy', methods=['GET'])
 def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
-    root_ids = tax.find_root_symptoms()
+    root_symptom_ids = tax.find_root_symptoms()
 
     #
     # Build and return list of recusively populated symptoms
     #
 
-    def id_to_symptom(id: int) -> DeepSymptom:
-        return DeepSymptom(id=id,
-                           parent=tax.get_parent(id),
-                           names=tax.nxg.nodes[id]['names'],
-                           children=tax.get_children(id))
+    def id_to_symptom(symptom_id: int) -> DeepSymptom:
+        return DeepSymptom(id=symptom_id,
+                           parent=tax.get_parent(symptom_id),
+                           names=tax.nxg.nodes[symptom_id]['names'],
+                           children=tax.get_children(symptom_id))
 
-    return {'root_symptoms': [id_to_symptom(root_node) for root_node in root_ids]}
+    return {'root_symptoms': [id_to_symptom(root_node) for root_node in root_symptom_ids]}
 
 
 @app.route('/api/1.1.0/taxonomy', methods=['PUT'])
@@ -100,24 +100,7 @@ def post_symptom() -> Tuple[str, int]:
                       parent=request_data['parent'],
                       names=request_data['names'])
 
-    if tax.nxg.nodes:
-        next_id = max(tax.nxg.nodes) + 1
-    else:
-        next_id = 0
-
-    tax.nxg.add_nodes_from([(next_id, {'tid': '', 'names': symptom.names})])
-
-    parent = symptom.parent
-
-    if parent:
-        tax.nxg.add_edges_from([
-            (parent, next_id, RELATIONS['child']),
-            (next_id, parent, RELATIONS['parent'])
-        ])
-
-    tax.nxg.add_edges_from([
-        (next_id, next_id, RELATIONS['synonym'])
-    ])
+    tax.add_symptom(symptom.parent, symptom.names)
 
     return '', 201
 
@@ -130,56 +113,14 @@ def put_symptom() -> str:
                       parent=request_data['parent'],
                       names=request_data['names'])
 
-    node = symptom.id
-
-    #
-    # Disconnect from old parent
-    #
-
-    old_parent = get_parent(node)
-
-    if old_parent:
-        tax.nxg.remove_edge(old_parent, node)
-        tax.nxg.remove_edge(node, old_parent)
-
-    #
-    # Connect to new parent
-    #
-
-    new_parent = symptom.parent
-
-    if new_parent:
-        tax.nxg.add_edges_from([
-            (new_parent, node, RELATIONS['child']),
-            (node, new_parent, RELATIONS['parent']),
-        ])
-
-    #
-    # Set new names
-    #
-
-    tax.nxg.nodes[node]['names'] = symptom.names
+    tax.update_symptom(symptom.id, symptom.parent, symptom.names)
 
     return ''
 
 
 @app.route('/api/1.1.0/symptom/<int:symptom_id>', methods=['DELETE'])
 def delete_symptom(symptom_id: int) -> str:
-    #
-    # Disconnect from old parent
-    #
-
-    old_parent = get_parent(symptom_id)
-
-    if old_parent:
-        tax.nxg.remove_edge(old_parent, symptom_id)
-        tax.nxg.remove_edge(symptom_id, old_parent)
-
-    #
-    # Delete node
-    #
-
-    tax.nxg.remove_node(symptom_id)
+    tax.delete_symptom(symptom_id)
 
     return ''
 
