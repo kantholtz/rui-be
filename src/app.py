@@ -3,12 +3,9 @@ from typing import Dict, Tuple, List, Optional
 
 import yaml
 from draug.homag.tax import Tax, RELATIONS
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request
 from flask_cors import CORS
 from werkzeug.datastructures import FileStorage
-
-from src import taxonomy
-from src.json_encoder import JsonEncoder
 
 #
 # Set up app object
@@ -19,7 +16,6 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['JSON_SORT_KEYS'] = False  # Simplify debugging in frontend
-app.json_encoder = JsonEncoder
 
 #
 # Create taxonomy
@@ -53,13 +49,6 @@ tax = Tax(meta)
 @app.route('/')
 def get_root():
     return 'Server is up'
-
-
-@app.route('/api/1.0.0/symptom/<int:symptom_id>', methods=['DELETE'])
-def delete_symptom(symptom_id: int) -> Response:
-    symptom = taxonomy.delete_symptom(symptom_id)
-
-    return jsonify(symptom)
 
 
 @dataclass
@@ -202,6 +191,27 @@ def put_symptom() -> str:
     #
 
     tax.nxg.nodes[node]['names'] = symptom.names
+
+    return ''
+
+
+@app.route('/api/1.0.0/symptom/<int:symptom_id>', methods=['DELETE'])
+def delete_symptom(symptom_id: int) -> str:
+    #
+    # Disconnect from old parent
+    #
+
+    old_parent = get_parent(symptom_id)
+
+    if old_parent:
+        tax.nxg.remove_edge(old_parent, symptom_id)
+        tax.nxg.remove_edge(symptom_id, old_parent)
+
+    #
+    # Delete node
+    #
+
+    tax.nxg.remove_node(symptom_id)
 
     return ''
 
