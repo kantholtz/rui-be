@@ -32,17 +32,6 @@ tax = Tax(meta)
 
 
 #
-# Seed taxonomy
-#
-
-# cat_a = add_symptom(None, 'Cat A')
-# cat_a_1 = add_symptom(cat_a, 'Cat A.1')
-# cat_a_2 = add_symptom(cat_a, 'Cat A.2')
-# cat_a_2_1 = add_symptom(cat_a_2, 'Cat A.2.1')
-# cat_b = add_symptom(None, 'Cat B')
-
-
-#
 # Set up routes
 #
 
@@ -63,7 +52,7 @@ class DeepSymptom:
     id: int
     parent: int
     names: List[str]
-    child_symptoms: List
+    children: List
 
 
 def get_parent(node: int) -> Optional[int]:
@@ -75,7 +64,7 @@ def get_parent(node: int) -> Optional[int]:
     return parents[0] if len(parents) == 1 else None
 
 
-@app.route('/api/1.0.0/taxonomy', methods=['GET'])
+@app.route('/api/1.1.0/taxonomy', methods=['GET'])
 def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
     #
     # Determine root nodes
@@ -103,13 +92,13 @@ def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
         return DeepSymptom(id=node,
                            parent=get_parent(node),
                            names=tax.nxg.nodes[node]['names'],
-                           child_symptoms=get_children(node))
+                           children=get_children(node))
 
     return {'root_symptoms': [node_to_symptom(root_node) for root_node in root_nodes]}
 
 
-@app.route('/api/1.0.0/taxonomy', methods=['PUT'])
-def put_taxonomy() -> Tuple[str, int]:
+@app.route('/api/1.1.0/taxonomy', methods=['PUT'])
+def put_taxonomy() -> str:
     global tax
 
     meta_yml: FileStorage = request.files['metaYml']
@@ -125,10 +114,10 @@ def put_taxonomy() -> Tuple[str, int]:
 
     tax = Tax.load_from_memory(meta_dict, nodes, triples)
 
-    return '', 201
+    return ''
 
 
-@app.route('/api/1.0.0/symptom', methods=['POST'])
+@app.route('/api/1.1.0/symptom', methods=['POST'])
 def post_symptom() -> Tuple[str, int]:
     request_data: Dict = request.get_json()
 
@@ -154,7 +143,7 @@ def post_symptom() -> Tuple[str, int]:
     return '', 201
 
 
-@app.route('/api/1.0.0/symptom', methods=['PUT'])
+@app.route('/api/1.1.0/symptom', methods=['PUT'])
 def put_symptom() -> str:
     request_data: Dict = request.get_json()
 
@@ -195,7 +184,7 @@ def put_symptom() -> str:
     return ''
 
 
-@app.route('/api/1.0.0/symptom/<int:symptom_id>', methods=['DELETE'])
+@app.route('/api/1.1.0/symptom/<int:symptom_id>', methods=['DELETE'])
 def delete_symptom(symptom_id: int) -> str:
     #
     # Disconnect from old parent

@@ -2,7 +2,7 @@ openapi: 3.0.0
 
 info:
   description: API for the RUI backend
-  version: "1.0.0"
+  version: '1.1.0'
   title: RUI
   contact:
     email: tobias.uhmann@gmail.com
@@ -13,59 +13,31 @@ tags:
 
 paths:
 
-  /symptom:
+  /taxonomy:
 
     get:
       tags:
-        - symptom
-      summary: Get root symptoms
-      operationId: getSymptom
+        - symptoms
+      summary: |
+        Get the root symptoms, enriched by their child symptoms, which
+        are in turn recursively enriched by their child symptoms.
+      operationId: getTaxonomy
       responses:
         '200':
-          description: Got root symptoms successfully
+          description: Got taxonomy successfully
           content:
-            application/json:
+            applicatation/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Symptom'
-
-    post:
-      tags:
-        - symptom
-      summary: Create symptom
-      operationId: postSymptom
-      responses:
-        '201':
-          description: Created symptom
-      requestBody:
-        $ref: '#/components/requestBodies/Symptom'
-
-  '/symptom/{symptomId}':
-
-    delete:
-      tags:
-        - symptom
-      summary: Delete symptom
-      operationId: deleteSymptom
-      parameters:
-        - name: symptomId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Symptom not found
-
-  '/taxonomy':
+                type: object
+                properties:
+                  rootSymptoms:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DeepSymptom'
 
     put:
       tags:
-        - symptom
+        - symptoms
       summary: Overwrite the existing taxonomy
       operationId: putTaxonomy
       requestBody:
@@ -85,7 +57,49 @@ paths:
                   format: binary
       responses:
         '200':
-          description: Updated
+          description: Put taxonomy successfully
+
+  /symptom:
+
+    post:
+      tags:
+        - symptoms
+      summary: Create symptom
+      operationId: postSymptom
+      requestBody:
+        $ref: '#/components/requestBodies/Symptom'
+      responses:
+        '201':
+          description: Created symptom successfully
+
+    put:
+      tags:
+        - symptoms
+      summary: Create symptom
+      operationId: putSymptom
+      requestBody:
+        $ref: '#/components/requestBodies/Symptom'
+      responses:
+        '200':
+          description: Put symptom successfully
+
+  '/symptom/{symptomId}':
+
+    delete:
+      tags:
+        - symptoms
+      summary: Delete symptom
+      operationId: deleteSymptom
+      parameters:
+        - name: symptomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Deleted symptom successfully
 
 components:
 
@@ -97,13 +111,30 @@ components:
         id:
           type: integer
           format: int64
+        parent:
+          type: integer
+          format: int64
         name:
           type: string
           example: Short circuit
+
+    DeepSymptom:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        parent:
+          type: integer
+          format: int64
+        names:
+          type: array
+          items:
+            type: string
         children:
           type: array
           items:
-            $ref: '#/components/schemas/Symptom'
+            $ref: '#/components/schemas/DeepSymptom'
 
   requestBodies:
 
