@@ -30,7 +30,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  rootSymptoms:
+                  taxonomy:
                     type: array
                     items:
                       $ref: '#/components/schemas/DeepSymptom'

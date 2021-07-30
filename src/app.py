@@ -69,7 +69,7 @@ def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
                            names=tax.nxg.nodes[symptom_id]['names'],
                            children=tax.get_children(symptom_id))
 
-    return {'root_symptoms': [id_to_symptom(root_node) for root_node in root_symptom_ids]}
+    return {'taxonomy': [id_to_symptom(root_node) for root_node in root_symptom_ids]}
 
 
 @app.route('/api/1.1.0/taxonomy', methods=['PUT'])
