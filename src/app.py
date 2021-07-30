@@ -125,7 +125,11 @@ def post_symptom() -> Tuple[str, int]:
                       parent=request_data['parent'],
                       names=request_data['names'])
 
-    next_id = max(tax.nxg.nodes) + 1
+    if tax.nxg.nodes:
+        next_id = max(tax.nxg.nodes) + 1
+    else:
+        next_id = 0
+
     tax.nxg.add_nodes_from([(next_id, {'tid': '', 'names': symptom.names})])
 
     parent = symptom.parent
