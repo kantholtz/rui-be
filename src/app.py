@@ -55,46 +55,21 @@ class DeepSymptom:
     children: List
 
 
-def get_parent(node: int) -> Optional[int]:
-    parents = [neighbor for neighbor, edge_props in tax.nxg[node].items()
-               if RELATIONS['parent'] in edge_props]
-
-    assert len(parents) <= 1
-
-    return parents[0] if len(parents) == 1 else None
-
-
 @app.route('/api/1.1.0/taxonomy', methods=['GET'])
 def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
-    #
-    # Determine root nodes
-    #
-
-    def find_root(node: int) -> int:
-        parent = get_parent(node)
-
-        if parent:
-            return find_root(parent)
-        else:
-            return node
-
-    root_nodes = {find_root(node) for node in tax.nxg.nodes}
+    root_ids = tax.find_root_symptoms()
 
     #
     # Build and return list of recusively populated symptoms
     #
 
-    def get_children(node: int) -> List[int]:
-        return [neighbor for neighbor, edge_props in tax.nxg[node].items()
-                if RELATIONS['child'] in edge_props]
+    def id_to_symptom(id: int) -> DeepSymptom:
+        return DeepSymptom(id=id,
+                           parent=tax.get_parent(id),
+                           names=tax.nxg.nodes[id]['names'],
+                           children=tax.get_children(id))
 
-    def node_to_symptom(node: int) -> DeepSymptom:
-        return DeepSymptom(id=node,
-                           parent=get_parent(node),
-                           names=tax.nxg.nodes[node]['names'],
-                           children=get_children(node))
-
-    return {'root_symptoms': [node_to_symptom(root_node) for root_node in root_nodes]}
+    return {'root_symptoms': [id_to_symptom(root_node) for root_node in root_ids]}
 
 
 @app.route('/api/1.1.0/taxonomy', methods=['PUT'])
