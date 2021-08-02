@@ -67,7 +67,7 @@ def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
         return DeepSymptom(id=symptom_id,
                            parent=tax.get_parent(symptom_id),
                            names=tax.nxg.nodes[symptom_id]['names'],
-                           children=tax.get_children(symptom_id))
+                           children=[id_to_symptom(child) for child in tax.get_children(symptom_id)])
 
     return {'taxonomy': [id_to_symptom(root_node) for root_node in root_symptom_ids]}
 
