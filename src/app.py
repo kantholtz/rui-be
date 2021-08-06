@@ -56,7 +56,7 @@ class DeepSymptom:
 
 @app.route('/api/1.1.0/taxonomy', methods=['GET'])
 def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
-    root_symptom_ids = graph.find_root_symptoms()
+    root_symptom_ids = graph.find_root_ents()
 
     #
     # Build and return list of recusively populated symptoms
@@ -100,7 +100,7 @@ def post_symptom() -> Tuple[str, int]:
                       parent=request_data['parent'],
                       names=request_data['names'])
 
-    graph.add_symptom(symptom.parent, symptom.names)
+    graph.add_ent(symptom.parent, symptom.names)
 
     return '', 201
 
@@ -113,14 +113,14 @@ def put_symptom() -> str:
                       parent=request_data['parent'],
                       names=request_data['names'])
 
-    graph.update_symptom(symptom.id, symptom.parent, symptom.names)
+    graph.update_ent(symptom.id, symptom.parent, symptom.names)
 
     return ''
 
 
 @app.route('/api/1.1.0/symptom/<int:symptom_id>', methods=['DELETE'])
 def delete_symptom(symptom_id: int) -> str:
-    graph.delete_symptom(symptom_id)
+    graph.delete_ent(symptom_id)
 
     return ''
 
