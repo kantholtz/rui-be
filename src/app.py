@@ -40,14 +40,14 @@ def get_root():
 
 
 @dataclass
-class Symptom:
+class Entity:
     id: int
     parent: int
     names: List[str]
 
 
 @dataclass
-class DeepSymptom:
+class DeepEntity:
     id: int
     parent: int
     names: List[str]
@@ -55,20 +55,20 @@ class DeepSymptom:
 
 
 @app.route('/api/1.1.0/taxonomy', methods=['GET'])
-def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
-    root_symptom_ids = graph.find_root_ents()
+def get_taxonomy() -> Dict[str, List[DeepEntity]]:
+    root_entity_ids = graph.find_root_ents()
 
     #
-    # Build and return list of recusively populated symptoms
+    # Build and return list of recusively populated entities
     #
 
-    def id_to_symptom(symptom_id: int) -> DeepSymptom:
-        return DeepSymptom(id=symptom_id,
-                           parent=graph.get_parent(symptom_id),
-                           names=graph.nxg.nodes[symptom_id]['names'],
-                           children=[id_to_symptom(child) for child in graph.get_children(symptom_id)])
+    def id_to_entity(entity_id: int) -> DeepEntity:
+        return DeepEntity(id=entity_id,
+                           parent=graph.get_parent(entity_id),
+                           names=graph.nxg.nodes[entity_id]['names'],
+                           children=[id_to_entity(child) for child in graph.get_children(entity_id)])
 
-    return {'taxonomy': [id_to_symptom(root_node) for root_node in root_symptom_ids]}
+    return {'taxonomy': [id_to_entity(root_node) for root_node in root_entity_ids]}
 
 
 @app.route('/api/1.1.0/taxonomy', methods=['PUT'])
@@ -87,40 +87,40 @@ def put_taxonomy() -> str:
     str_triples = (line.split() for line in edges_txt.stream)
     triples = ((int(str_triple[0]), int(str_triple[1]), int(str_triple[2])) for str_triple in str_triples)
 
-    graph = Graph.load_from_memory(meta_dict, nodes, triples)
+    graph = Graph.load_from_streams(meta_dict, nodes, triples)
 
     return ''
 
 
-@app.route('/api/1.1.0/symptom', methods=['POST'])
-def post_symptom() -> Tuple[str, int]:
+@app.route('/api/1.1.0/entity', methods=['POST'])
+def post_entity() -> Tuple[str, int]:
     request_data: Dict = request.get_json()
 
-    symptom = Symptom(id=request_data['id'],
+    entity = Entity(id=request_data['id'],
                       parent=request_data['parent'],
                       names=request_data['names'])
 
-    graph.add_ent(symptom.parent, symptom.names)
+    graph.add_ent(entity.parent, entity.names)
 
     return '', 201
 
 
-@app.route('/api/1.1.0/symptom', methods=['PUT'])
-def put_symptom() -> str:
+@app.route('/api/1.1.0/entity', methods=['PUT'])
+def put_entity() -> str:
     request_data: Dict = request.get_json()
 
-    symptom = Symptom(id=request_data['id'],
+    entity = Entity(id=request_data['id'],
                       parent=request_data['parent'],
                       names=request_data['names'])
 
-    graph.update_ent(symptom.id, symptom.parent, symptom.names)
+    graph.update_ent(entity.id, entity.parent, entity.names)
 
     return ''
 
 
-@app.route('/api/1.1.0/symptom/<int:symptom_id>', methods=['DELETE'])
-def delete_symptom(symptom_id: int) -> str:
-    graph.delete_ent(symptom_id)
+@app.route('/api/1.1.0/entity/<int:entity_id>', methods=['DELETE'])
+def delete_entity(entity_id: int) -> str:
+    graph.delete_ent(entity_id)
 
     return ''
 

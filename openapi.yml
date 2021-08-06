@@ -8,8 +8,8 @@ info:
     email: tobias.uhmann@gmail.com
 
 tags:
-  - name: symptom
-    description: Everything about symptoms
+  - name: taxonomy
+    description: Everything about the taxonomy and its entities
 
 paths:
 
@@ -17,10 +17,10 @@ paths:
 
     get:
       tags:
-        - symptoms
+        - taxonomy
       summary: |
-        Get the root symptoms, enriched by their child symptoms, which
-        are in turn recursively enriched by their child symptoms.
+        Get the root entities, enriched by their child entities, which
+        are in turn recursively enriched by their child entities.
       operationId: getTaxonomy
       responses:
         '200':
@@ -33,11 +33,11 @@ paths:
                   taxonomy:
                     type: array
                     items:
-                      $ref: '#/components/schemas/DeepSymptom'
+                      $ref: '#/components/schemas/DeepEntity'
 
     put:
       tags:
-        - symptoms
+        - taxonomy
       summary: Overwrite the existing taxonomy
       operationId: putTaxonomy
       requestBody:
@@ -59,39 +59,39 @@ paths:
         '200':
           description: Put taxonomy successfully
 
-  /symptom:
+  /entity:
 
     post:
       tags:
-        - symptoms
-      summary: Create symptom
-      operationId: postSymptom
+        - taxonomy
+      summary: Create entity
+      operationId: postEntity
       requestBody:
-        $ref: '#/components/requestBodies/Symptom'
+        $ref: '#/components/requestBodies/Entity'
       responses:
         '201':
-          description: Created symptom successfully
+          description: Created entity successfully
 
     put:
       tags:
-        - symptoms
-      summary: Create symptom
-      operationId: putSymptom
+        - taxonomy
+      summary: Create entity
+      operationId: putEntity
       requestBody:
-        $ref: '#/components/requestBodies/Symptom'
+        $ref: '#/components/requestBodies/Entity'
       responses:
         '200':
-          description: Put symptom successfully
+          description: Put entity successfully
 
-  '/symptom/{symptomId}':
+  '/entity/{entityId}':
 
     delete:
       tags:
-        - symptoms
-      summary: Delete symptom
-      operationId: deleteSymptom
+        - taxonomy
+      summary: Delete entity
+      operationId: deleteEntity
       parameters:
-        - name: symptomId
+        - name: entityId
           in: path
           required: true
           schema:
@@ -99,13 +99,13 @@ paths:
             format: int64
       responses:
         '200':
-          description: Deleted symptom successfully
+          description: Deleted entity successfully
 
 components:
 
   schemas:
 
-    Symptom:
+    Entity:
       type: object
       properties:
         id:
@@ -118,7 +118,7 @@ components:
           type: string
           example: Short circuit
 
-    DeepSymptom:
+    DeepEntity:
       type: object
       properties:
         id:
@@ -134,13 +134,13 @@ components:
         children:
           type: array
           items:
-            $ref: '#/components/schemas/DeepSymptom'
+            $ref: '#/components/schemas/DeepEntity'
 
   requestBodies:
 
-    Symptom:
+    Entity:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Symptom'
+            $ref: '#/components/schemas/Entity'

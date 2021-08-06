@@ -37,17 +37,17 @@
 						{
 							"key": "metaYml",
 							"type": "file",
-							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax.v4/meta.yml"
+							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax.v5/graph/symptax.v5/meta.yml"
 						},
 						{
 							"key": "nodesTxt",
 							"type": "file",
-							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax.v4/nodes.txt"
+							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax.v5/graph/symptax.v5/nodes.txt"
 						},
 						{
 							"key": "edgesTxt",
 							"type": "file",
-							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax.v4/edges.txt"
+							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax.v5/graph/symptax.v5/edges.txt"
 						}
 					]
 				},
@@ -68,13 +68,13 @@
 			"response": []
 		},
 		{
-			"name": "/api/1.1.0/symptom",
+			"name": "/api/1.1.0/entity",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 0,\r\n    \"names\": [\"my symptom\", \"a synonym\"],\r\n    \"parent\": null\r\n}\r\n",
+					"raw": "{\r\n    \"id\": 0,\r\n    \"names\": [\"my entity\", \"a entity\"],\r\n    \"parent\": null\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -82,7 +82,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.1.0/symptom",
+					"raw": "http://localhost:5000/api/1.1.0/entity",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -91,20 +91,20 @@
 					"path": [
 						"api",
 						"1.1.0",
-						"symptom"
+						"entity"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "/api/1.1.0/symptom",
+			"name": "/api/1.1.0/entity",
 			"request": {
 				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 1,\r\n    \"names\": [\"my symptom\", \"b synonym\"],\r\n    \"parent\": null\r\n}\r\n",
+					"raw": "{\r\n    \"id\": 1,\r\n    \"names\": [\"my entity\", \"b entity\"],\r\n    \"parent\": null\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -112,7 +112,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.1.0/symptom",
+					"raw": "http://localhost:5000/api/1.1.0/entity",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -121,19 +121,19 @@
 					"path": [
 						"api",
 						"1.1.0",
-						"symptom"
+						"entity"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "/api/1.1.0/symptom/:symptom_id",
+			"name": "/api/1.1.0/entity/:entity_id",
 			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/1.1.0/symptom/1",
+					"raw": "http://localhost:5000/api/1.1.0/entity/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -142,7 +142,7 @@
 					"path": [
 						"api",
 						"1.1.0",
-						"symptom",
+						"entity",
 						"1"
 					]
 				}
