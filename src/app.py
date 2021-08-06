@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, Tuple, List
 
 import yaml
-from draug.homag.tax import Tax, RELATIONS
+from draug.homag.graph import RELATIONS, Graph
 from flask import Flask, request
 from flask_cors import CORS
 from werkzeug.datastructures import FileStorage
@@ -22,13 +22,12 @@ app.config['JSON_SORT_KEYS'] = False  # Simplify debugging in frontend
 #
 
 meta = {
-    'name': 'symptax.v4',
+    'name': 'symptax.v5',
     'reflexive': (RELATIONS['synonym'],),
-    'inverse': {RELATIONS['parent']: RELATIONS['child']},
     'relmap': {rid: name for name, rid in RELATIONS.items()}
 }
 
-tax = Tax(meta)
+graph = Graph(meta)
 
 
 #
@@ -57,7 +56,7 @@ class DeepSymptom:
 
 @app.route('/api/1.1.0/taxonomy', methods=['GET'])
 def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
-    root_symptom_ids = tax.find_root_symptoms()
+    root_symptom_ids = graph.find_root_symptoms()
 
     #
     # Build and return list of recusively populated symptoms
@@ -65,16 +64,16 @@ def get_taxonomy() -> Dict[str, List[DeepSymptom]]:
 
     def id_to_symptom(symptom_id: int) -> DeepSymptom:
         return DeepSymptom(id=symptom_id,
-                           parent=tax.get_parent(symptom_id),
-                           names=tax.nxg.nodes[symptom_id]['names'],
-                           children=[id_to_symptom(child) for child in tax.get_children(symptom_id)])
+                           parent=graph.get_parent(symptom_id),
+                           names=graph.nxg.nodes[symptom_id]['names'],
+                           children=[id_to_symptom(child) for child in graph.get_children(symptom_id)])
 
     return {'taxonomy': [id_to_symptom(root_node) for root_node in root_symptom_ids]}
 
 
 @app.route('/api/1.1.0/taxonomy', methods=['PUT'])
 def put_taxonomy() -> str:
-    global tax
+    global graph
 
     meta_yml: FileStorage = request.files['metaYml']
     nodes_txt: FileStorage = request.files['nodesTxt']
@@ -87,7 +86,7 @@ def put_taxonomy() -> str:
 
     triples = (tuple(map(int, line.split())) for line in edges_txt.stream)
 
-    tax = Tax.load_from_memory(meta_dict, nodes, triples)
+    graph = Tax.load_from_memory(meta_dict, nodes, triples)
 
     return ''
 
@@ -100,7 +99,7 @@ def post_symptom() -> Tuple[str, int]:
                       parent=request_data['parent'],
                       names=request_data['names'])
 
-    tax.add_symptom(symptom.parent, symptom.names)
+    graph.add_symptom(symptom.parent, symptom.names)
 
     return '', 201
 
@@ -113,14 +112,14 @@ def put_symptom() -> str:
                       parent=request_data['parent'],
                       names=request_data['names'])
 
-    tax.update_symptom(symptom.id, symptom.parent, symptom.names)
+    graph.update_symptom(symptom.id, symptom.parent, symptom.names)
 
     return ''
 
 
 @app.route('/api/1.1.0/symptom/<int:symptom_id>', methods=['DELETE'])
 def delete_symptom(symptom_id: int) -> str:
-    tax.delete_symptom(symptom_id)
+    graph.delete_symptom(symptom_id)
 
     return ''
 
