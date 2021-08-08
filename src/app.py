@@ -87,7 +87,7 @@ def put_taxonomy() -> str:
     str_triples = (line.split() for line in edges_txt.stream)
     triples = ((int(str_triple[0]), int(str_triple[1]), int(str_triple[2])) for str_triple in str_triples)
 
-    graph = Graph.load_from_streams(meta_dict, nodes, triples)
+    graph = Graph.load_from_memory(meta_dict, nodes, triples)
 
     return ''
 
