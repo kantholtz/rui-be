@@ -26,7 +26,7 @@ paths:
         '200':
           description: Got taxonomy successfully
           content:
-            applicatation/json:
+            application/json:
               schema:
                 type: object
                 properties:
