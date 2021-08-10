@@ -9,11 +9,9 @@ info:
 
 tags:
   - name: upload
-    description: Upload initial taxonomy and texts
+    description: Upload initial taxonomy and matches
   - name: entities
-    description: Work with entities
-  - name: texts
-    description: Work with texts
+  - name: matches
 
 paths:
 
@@ -22,7 +20,7 @@ paths:
     put:
       tags:
         - upload
-      summary: Put taxonomy and texts
+      summary: Put taxonomy and matches
       operationId: putData
       requestBody:
         content:
@@ -44,7 +42,7 @@ paths:
                   format: binary
       responses:
         '200':
-          description: Put taxonomy and texts successfully
+          description: Put taxonomy and matches successfully
 
   /entities:
 
@@ -110,22 +108,22 @@ paths:
         '200':
           description: Deleted entity successfully
 
-  /texts:
+  /matches:
 
     get:
       tags:
-        - texts
-      summary: Get texts for an entity
-      operationId: getTexts
+        - matches
+      summary: Get matches for an entity
+      operationId: getMatches
       parameters:
         - in: query
           name: entity
           schema:
             type: string
-          description: Entity whose texts to get
+          description: Entity whose matches to get
       responses:
         '200':
-          description: Got texts entities successfully
+          description: Got matches for entity successfully
           content:
             application/json:
               schema:
@@ -134,7 +132,7 @@ paths:
                   taxonomy:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Text'
+                      $ref: '#/components/schemas/Match'
 
 components:
 
@@ -171,10 +169,10 @@ components:
           items:
             $ref: '#/components/schemas/DeepEntity'
 
-    Text:
+    Match:
       type: object
       properties:
-        label:
+        entity:
           type: string
         mention:
           type: string
