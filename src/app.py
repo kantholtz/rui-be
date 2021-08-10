@@ -84,15 +84,15 @@ def parse_nodes_txt(nodes_txt: FileStorage) -> Iterator[tuple[int, dict]]:
     node {data} ...
     """
 
-    def parse_line(line: str) -> tuple[int, dict]:
-        chunks = line.split(' ', maxsplit=1)
+    def parse_line(line: bytes) -> tuple[int, dict]:
+        chunks = line.split(b' ', maxsplit=1)
 
         node_id = int(chunks[0])
         data = eval(chunks[1])
 
         return node_id, data
 
-    return (parse_line(str(line)) for line in nodes_txt.stream)
+    return (parse_line(line) for line in nodes_txt.stream)
 
 
 def parse_edges_txt(edges_txt: FileStorage) -> Iterator[tuple[int, int, int]]:
@@ -102,8 +102,8 @@ def parse_edges_txt(edges_txt: FileStorage) -> Iterator[tuple[int, int, int]]:
     head tail rel
     """
 
-    def parse_line(line: str) -> tuple[int, int, int]:
-        chunks = line.split(' ')
+    def parse_line(line: bytes) -> tuple[int, int, int]:
+        chunks = line.split(b' ')
 
         head = int(chunks[0])
         tail = int(chunks[1])
@@ -111,7 +111,7 @@ def parse_edges_txt(edges_txt: FileStorage) -> Iterator[tuple[int, int, int]]:
 
         return head, tail, rel
 
-    return (parse_line(str(line)) for line in edges_txt.stream)
+    return (parse_line(line) for line in edges_txt.stream)
 
 
 def parse_match_txt(match_txt: FileStorage) -> Iterator[Match]:
@@ -121,13 +121,13 @@ def parse_match_txt(match_txt: FileStorage) -> Iterator[Match]:
     entity_label|mention|ticket.phrase_id|phrase_text
     """
 
-    def parse_line(line: str) -> Match:
-        chunks = line.split('|')
+    def parse_line(line: bytes) -> Match:
+        chunks = line.split(b'|')
 
         entity = str(chunks[0])
         mention = str(chunks[1])
 
-        ticket_chunk, phrase_id_chunk = chunks[2].split('.')
+        ticket_chunk, phrase_id_chunk = chunks[2].split(b'.')
         ticket = int(ticket_chunk)
         phrase_id = int(phrase_id_chunk)
 
@@ -135,11 +135,11 @@ def parse_match_txt(match_txt: FileStorage) -> Iterator[Match]:
 
         return Match(entity, mention, ticket, phrase_id, phrase_text)
 
-    return (parse_line(str(line)) for line in match_txt.stream)
+    return (parse_line(line) for line in match_txt.stream)
 
 
-@app.route('/api/1.2.0/taxonomy', methods=['GET'])
-def get_taxonomy() -> dict[str, list[DeepEntity]]:
+@app.route('/api/1.2.0/entities', methods=['GET'])
+def get_entities() -> dict[str, list[DeepEntity]]:
     root_entity_ids = graph.find_root_ents()
 
     #
@@ -152,7 +152,7 @@ def get_taxonomy() -> dict[str, list[DeepEntity]]:
                           names=graph.nxg.nodes[entity_id]['names'],
                           children=[id_to_entity(child) for child in graph.get_children(entity_id)])
 
-    return {'taxonomy': [id_to_entity(root_node) for root_node in root_entity_ids]}
+    return {'entities': [id_to_entity(root_node) for root_node in root_entity_ids]}
 
 
 @app.route('/api/1.2.0/entity', methods=['POST'])
@@ -186,6 +186,15 @@ def delete_entity(entity_id: int) -> str:
     graph.delete_ent(entity_id)
 
     return ''
+
+
+@app.route('/api/1.2.0/matches', methods=['GET'])
+def get_matches() -> dict[str, list[Match]]:
+    global matches
+
+    entity = request.args.get('entity')
+
+    return {'matches': list(matches.get_entity_matches(entity))}
 
 
 #
