@@ -84,15 +84,15 @@ def parse_nodes_txt(nodes_txt: FileStorage) -> Iterator[tuple[int, dict]]:
     node {data} ...
     """
 
-    def parse_line(line: bytes) -> tuple[int, dict]:
-        chunks = line.split(b' ', maxsplit=1)
+    def parse_line(line: str) -> tuple[int, dict]:
+        chunks = line.split(' ', maxsplit=1)
 
         node_id = int(chunks[0])
         data = eval(chunks[1])
 
         return node_id, data
 
-    return (parse_line(line) for line in nodes_txt.stream)
+    return (parse_line(line.decode('utf-8')) for line in nodes_txt.stream)
 
 
 def parse_edges_txt(edges_txt: FileStorage) -> Iterator[tuple[int, int, int]]:
@@ -102,8 +102,8 @@ def parse_edges_txt(edges_txt: FileStorage) -> Iterator[tuple[int, int, int]]:
     head tail rel
     """
 
-    def parse_line(line: bytes) -> tuple[int, int, int]:
-        chunks = line.split(b' ')
+    def parse_line(line: str) -> tuple[int, int, int]:
+        chunks = line.split(' ')
 
         head = int(chunks[0])
         tail = int(chunks[1])
@@ -111,7 +111,7 @@ def parse_edges_txt(edges_txt: FileStorage) -> Iterator[tuple[int, int, int]]:
 
         return head, tail, rel
 
-    return (parse_line(line) for line in edges_txt.stream)
+    return (parse_line(line.decode('utf-8')) for line in edges_txt.stream)
 
 
 def parse_match_txt(match_txt: FileStorage) -> Iterator[Match]:
@@ -121,13 +121,13 @@ def parse_match_txt(match_txt: FileStorage) -> Iterator[Match]:
     entity_label|mention|ticket.phrase_id|phrase_text
     """
 
-    def parse_line(line: bytes) -> Match:
-        chunks = line.split(b'|')
+    def parse_line(line: str) -> Match:
+        chunks = line.split('|')
 
         entity = str(chunks[0])
         mention = str(chunks[1])
 
-        ticket_chunk, phrase_id_chunk = chunks[2].split(b'.')
+        ticket_chunk, phrase_id_chunk = chunks[2].split('.')
         ticket = int(ticket_chunk)
         phrase_id = int(phrase_id_chunk)
 
@@ -135,7 +135,7 @@ def parse_match_txt(match_txt: FileStorage) -> Iterator[Match]:
 
         return Match(entity, mention, ticket, phrase_id, phrase_text)
 
-    return (parse_line(line) for line in match_txt.stream)
+    return (parse_line(line.decode('utf-8')) for line in match_txt.stream)
 
 
 @app.route('/api/1.2.0/entities', methods=['GET'])
