@@ -3,6 +3,7 @@ from typing import Iterator
 
 import yaml
 from draug.homag.graph import RELATIONS, Graph
+from draug.homag.text import Match, Matches
 from flask import Flask, request
 from flask_cors import CORS
 from werkzeug.datastructures import FileStorage
@@ -28,6 +29,7 @@ meta = {
 }
 
 graph = Graph(meta)
+matches = Matches()
 
 
 #
@@ -54,23 +56,9 @@ class DeepEntity:
     children: list
 
 
-@dataclass
-class Phrase:
-    id: int
-    text: str
-
-
-@dataclass
-class Text:
-    label: str
-    mention: str
-    ticket: int
-    phrase: Phrase
-
-
 @app.route('/api/1.2.0/upload', methods=['PUT'])
 def put_data() -> str:
-    global graph
+    global graph, matches
 
     meta_yml: FileStorage = request.files['metaYml']
     nodes_txt: FileStorage = request.files['nodesTxt']
@@ -84,6 +72,7 @@ def put_data() -> str:
     graph = Graph.load_from_memory(meta, nodes, edges)
 
     matches = parse_match_txt(match_txt)
+    matches = Matches.from_matches(matches)
 
     return ''
 
@@ -125,14 +114,14 @@ def parse_edges_txt(edges_txt: FileStorage) -> Iterator[tuple[int, int, int]]:
     return (parse_line(str(line)) for line in edges_txt.stream)
 
 
-def parse_match_txt(match_txt: FileStorage) -> Iterator[tuple[str, str, int, int, str]]:
+def parse_match_txt(match_txt: FileStorage) -> Iterator[Match]:
     """
     Parse Nodes TXT whose lines have the following format:
 
     entity_label|mention|ticket.phrase_id|phrase_text
     """
 
-    def parse_line(line: str) -> tuple[str, str, int, int, str]:
+    def parse_line(line: str) -> Match:
         chunks = line.split('|')
 
         entity = str(chunks[0])
@@ -144,7 +133,7 @@ def parse_match_txt(match_txt: FileStorage) -> Iterator[tuple[str, str, int, int
 
         phrase_text = str(chunks[3])
 
-        return entity, mention, ticket, phrase_id, phrase_text
+        return Match(entity, mention, ticket, phrase_id, phrase_text)
 
     return (parse_line(str(line)) for line in match_txt.stream)
 
