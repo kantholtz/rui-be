@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath src app:app
+web: gunicorn --workers=1 src.app:app
