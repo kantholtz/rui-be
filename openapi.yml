@@ -21,7 +21,7 @@ paths:
       tags:
         - upload
       summary: Put taxonomy and matches
-      operationId: putData
+      operationId: putUpload
       requestBody:
         content:
           multipart/form-data:

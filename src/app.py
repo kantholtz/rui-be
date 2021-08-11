@@ -57,7 +57,7 @@ class DeepEntity:
 
 
 @app.route('/api/1.2.0/upload', methods=['PUT'])
-def put_data() -> str:
+def put_upload() -> str:
     global graph, matches
 
     meta_yml: FileStorage = request.files['metaYml']
