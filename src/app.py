@@ -29,7 +29,7 @@ meta = {
 }
 
 graph = Graph(meta)
-matches = Matches()
+matches_store = Matches()
 
 
 #
@@ -58,7 +58,7 @@ class DeepEntity:
 
 @app.route('/api/1.2.0/upload', methods=['PUT'])
 def put_upload() -> str:
-    global graph, matches
+    global graph, matches_store
 
     meta_yml: FileStorage = request.files['metaYml']
     nodes_txt: FileStorage = request.files['nodesTxt']
@@ -72,7 +72,7 @@ def put_upload() -> str:
     graph = Graph.load_from_memory(meta, nodes, edges)
 
     matches = parse_match_txt(match_txt)
-    matches = Matches.from_matches(matches)
+    matches_store = Matches.from_matches(matches)
 
     return ''
 
@@ -190,11 +190,36 @@ def delete_entity(entity_id: int) -> str:
 
 @app.route('/api/1.2.0/matches', methods=['GET'])
 def get_matches() -> dict[str, list[Match]]:
-    global matches
+    global matches_store
+
+    #
+    # Parse query params
+    #
 
     entity = request.args.get('entity')
 
-    return {'matches': list(matches.get_entity_matches(entity))}
+    limit = request.args.get('limit')
+    if limit:
+        limit = int(limit)
+
+    offset = request.args.get('offset')
+    if offset:
+        offset = int(offset)
+
+    #
+    # Get matches from draug and apply pagination
+    #
+
+    matches = list(matches_store.get_entity_matches(entity))
+
+    if limit and offset:
+        matches = matches[offset:(offset + limit)]
+    elif limit:
+        matches = matches[:limit]
+    elif offset:
+        matches = matches[offset:]
+
+    return {'matches': matches}
 
 
 #

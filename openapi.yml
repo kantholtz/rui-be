@@ -121,6 +121,16 @@ paths:
           schema:
             type: string
           description: Entity whose matches to get
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Pagination Limit
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: Pagination Offset
       responses:
         '200':
           description: Got matches for entity successfully
