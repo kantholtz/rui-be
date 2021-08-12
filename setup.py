@@ -2,5 +2,5 @@ from distutils.core import setup
 
 setup(
     name='rui-be',
-    version='0.4.0'
+    version='0.5.0'
 )

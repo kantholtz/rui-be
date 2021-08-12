@@ -6,28 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "/api/1.1.0/taxonomy",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:5000/api/1.1.0/taxonomy",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.1.0",
-						"taxonomy"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/api/1.1.0/taxonomy",
+			"name": "/api/1.2.0/upload",
 			"request": {
 				"method": "PUT",
 				"header": [],
@@ -48,11 +27,16 @@
 							"key": "edgesTxt",
 							"type": "file",
 							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax.v5/graph/symptax.v5/edges.txt"
+						},
+						{
+							"key": "matchTxt",
+							"type": "file",
+							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax.v5/mentions/symptax.v5.match.txt"
 						}
 					]
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.1.0/taxonomy",
+					"raw": "http://localhost:5000/api/1.2.0/upload",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -60,15 +44,36 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.1.0",
-						"taxonomy"
+						"1.2.0",
+						"upload"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "/api/1.1.0/entity",
+			"name": "/api/1.2.0/entities",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/1.2.0/entities",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"1.2.0",
+						"entities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/api/1.2.0/entity",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -82,7 +87,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.1.0/entity",
+					"raw": "http://localhost:5000/api/1.2.0/entity",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -90,7 +95,7 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.1.0",
+						"1.2.0",
 						"entity"
 					]
 				}
@@ -98,7 +103,7 @@
 			"response": []
 		},
 		{
-			"name": "/api/1.1.0/entity",
+			"name": "/api/1.2.0/entity",
 			"request": {
 				"method": "PUT",
 				"header": [],
@@ -112,7 +117,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.1.0/entity",
+					"raw": "http://localhost:5000/api/1.2.0/entity",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -120,7 +125,7 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.1.0",
+						"1.2.0",
 						"entity"
 					]
 				}
@@ -128,12 +133,12 @@
 			"response": []
 		},
 		{
-			"name": "/api/1.1.0/entity/:entity_id",
+			"name": "/api/1.2.0/entity/:entity_id",
 			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/1.1.0/entity/1",
+					"raw": "http://localhost:5000/api/1.2.0/entity/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -141,9 +146,44 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.1.0",
+						"1.2.0",
 						"entity",
 						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/api/1.2.0/matches",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/1.2.0/matches?name=schwach&offset=10&limit=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"1.2.0",
+						"matches"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "schwach"
+						},
+						{
+							"key": "offset",
+							"value": "10"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						}
 					]
 				}
 			},
