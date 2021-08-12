@@ -196,28 +196,28 @@ def get_matches() -> dict[str, list[Match]]:
     # Parse query params
     #
 
-    entity = request.args.get('entity')
-
-    limit = request.args.get('limit')
-    if limit:
-        limit = int(limit)
+    name = request.args.get('name')
 
     offset = request.args.get('offset')
     if offset:
         offset = int(offset)
 
+    limit = request.args.get('limit')
+    if limit:
+        limit = int(limit)
+
     #
     # Get matches from draug and apply pagination
     #
 
-    matches = list(matches_store.get_entity_matches(entity))
+    matches = list(matches_store.get_entity_matches(name))
 
-    if limit and offset:
+    if offset and limit:
         matches = matches[offset:(offset + limit)]
-    elif limit:
-        matches = matches[:limit]
     elif offset:
         matches = matches[offset:]
+    elif limit:
+        matches = matches[:limit]
 
     return {'matches': matches}
 
