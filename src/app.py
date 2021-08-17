@@ -34,7 +34,33 @@ matches_store = Matches()
 
 
 #
-# Set up routes
+# Dataclasses
+#
+
+@dataclass
+class Entity:
+    id: int
+    node: int
+    name: str
+
+
+@dataclass
+class Node:
+    id: int
+    parent: int
+    entities: list[Entity]
+
+
+@dataclass
+class DeepNode:
+    id: int
+    parent: int
+    entities: list[Entity]
+    children: list
+
+
+#
+# Root Route
 #
 
 @app.route('/')
@@ -42,26 +68,11 @@ def get_root():
     return 'Server is up'
 
 
-@dataclass
-class Node:
-    id: int
-    parent: int
-    names: list[str]
-
-
-@dataclass
-class DeepNode:
-    id: int
-    parent: int
-    names: list[str]
-    children: list
-
-
 #
 # Upload
 #
 
-@app.route('/api/1.3.0/upload', methods=['PUT'])
+@app.route('/api/1.4.0/upload', methods=['PUT'])
 def put_upload() -> str:
     global graph, matches_store
 
@@ -116,7 +127,7 @@ def _parse_match_txt(match_txt: str) -> list[Match]:
 # Nodes
 #
 
-@app.route('/api/1.3.0/nodes', methods=['GET'])
+@app.route('/api/1.4.0/nodes', methods=['GET'])
 def get_nodes() -> dict[str, list[DeepNode]]:
     root_node_ids = graph.find_root_ents()
 
@@ -125,17 +136,20 @@ def get_nodes() -> dict[str, list[DeepNode]]:
     #
 
     def deep_node_from_node_id(node_id: int) -> DeepNode:
+        entity_ids = graph.node_eids(node_id)
+
         return DeepNode(id=node_id,
                         parent=graph.get_parent(node_id),
-                        names=graph.nxg.nodes[node_id]['names'],
+                        entities=[Entity(entity_id, node_id, graph.entity_name(entity_id))
+                                  for entity_id in entity_ids],
                         children=[deep_node_from_node_id(child)
                                   for child in graph.get_children(node_id)])
 
-    return {'root_nodes': [deep_node_from_node_id(root_node)
-                           for root_node in root_node_ids]}
+    return {'root_nodes': [deep_node_from_node_id(root_node_id)
+                           for root_node_id in root_node_ids]}
 
 
-@app.route('/api/1.3.0/nodes', methods=['POST'])
+@app.route('/api/1.4.0/nodes', methods=['POST'])
 def post_node() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
@@ -148,7 +162,7 @@ def post_node() -> tuple[str, int]:
     return '', 201
 
 
-@app.route('/api/1.3.0/nodes', methods=['PUT'])
+@app.route('/api/1.4.0/nodes', methods=['PUT'])
 def put_node() -> str:
     request_data: dict = request.get_json()
 
@@ -161,7 +175,7 @@ def put_node() -> str:
     return ''
 
 
-@app.route('/api/1.3.0/nodes/<int:node_id>', methods=['DELETE'])
+@app.route('/api/1.4.0/nodes/<int:node_id>', methods=['DELETE'])
 def delete_node(node_id: int) -> str:
     graph.delete_ent(node_id)
 
@@ -169,10 +183,15 @@ def delete_node(node_id: int) -> str:
 
 
 #
+# Entities
+#
+
+
+#
 # Matches
 #
 
-@app.route('/api/1.3.0/matches', methods=['GET'])
+@app.route('/api/1.4.0/matches', methods=['GET'])
 def get_matches() -> dict[str, list[Match]]:
     global matches_store
 
