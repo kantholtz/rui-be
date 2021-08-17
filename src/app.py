@@ -77,32 +77,30 @@ def put_upload() -> str:
     graph = Graph.load(extracted_dir)
 
     match_txt: str = os.path.join(extracted_dir, 'match.txt')
-    matches = parse_match_txt(match_txt)
+    matches = _parse_match_txt(match_txt)
     matches_store = Matches.from_matches(matches)
 
     return ''
 
 
-def parse_match_txt(match_txt: str) -> list[Match]:
+def _parse_match_txt(match_txt: str) -> list[Match]:
     """
-    Parse Nodes TXT whose lines have the following format:
+    Parse Match TXT whose lines have the following format:
 
-    entity_label|mention|ticket.phrase_id|phrase_text
+    ticket|node_name|node_id|mention|mention_indexes|context
     """
 
     def parse_line(line: str) -> Match:
         chunks = line.split('|')
 
-        entity = str(chunks[0])
-        mention = str(chunks[1])
+        ticket: int = int(chunks[0])
+        node_name: str = chunks[1]
+        node_id: int = int(chunks[2])
+        mention: str = chunks[3]
+        mention_indexes: tuple[int] = tuple(map(int, chunks[4].split()))
+        context: str = chunks[5]
 
-        ticket_chunk, phrase_id_chunk = chunks[2].split('.')
-        ticket = int(ticket_chunk)
-        phrase_id = int(phrase_id_chunk)
-
-        phrase_text = str(chunks[3])
-
-        return Match(entity, mention, ticket, phrase_id, phrase_text)
+        return Match(ticket, node_id, node_name, mention, context, mention_indexes)
 
     with open(match_txt, encoding='utf-8') as f:
         matches = [parse_line(line) for line in f.readlines()]
