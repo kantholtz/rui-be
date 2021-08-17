@@ -43,19 +43,23 @@ def get_root():
 
 
 @dataclass
-class Entity:
+class Node:
     id: int
     parent: int
     names: list[str]
 
 
 @dataclass
-class DeepEntity:
+class DeepNode:
     id: int
     parent: int
     names: list[str]
     children: list
 
+
+#
+# Upload
+#
 
 @app.route('/api/1.3.0/upload', methods=['PUT'])
 def put_upload() -> str:
@@ -108,55 +112,65 @@ def _parse_match_txt(match_txt: str) -> list[Match]:
     return matches
 
 
-@app.route('/api/1.3.0/entities', methods=['GET'])
-def get_entities() -> dict[str, list[DeepEntity]]:
-    root_entity_ids = graph.find_root_ents()
+#
+# Nodes
+#
+
+@app.route('/api/1.3.0/nodes', methods=['GET'])
+def get_nodes() -> dict[str, list[DeepNode]]:
+    root_node_ids = graph.find_root_ents()
 
     #
-    # Build and return list of recusively populated entities
+    # Build and return list of recusively populated nodes
     #
 
-    def id_to_entity(entity_id: int) -> DeepEntity:
-        return DeepEntity(id=entity_id,
-                          parent=graph.get_parent(entity_id),
-                          names=graph.nxg.nodes[entity_id]['names'],
-                          children=[id_to_entity(child) for child in graph.get_children(entity_id)])
+    def deep_node_from_node_id(node_id: int) -> DeepNode:
+        return DeepNode(id=node_id,
+                        parent=graph.get_parent(node_id),
+                        names=graph.nxg.nodes[node_id]['names'],
+                        children=[deep_node_from_node_id(child)
+                                  for child in graph.get_children(node_id)])
 
-    return {'entities': [id_to_entity(root_node) for root_node in root_entity_ids]}
+    return {'root_nodes': [deep_node_from_node_id(root_node)
+                           for root_node in root_node_ids]}
 
 
-@app.route('/api/1.3.0/entity', methods=['POST'])
-def post_entity() -> tuple[str, int]:
+@app.route('/api/1.3.0/nodes', methods=['POST'])
+def post_node() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
-    entity = Entity(id=request_data['id'],
-                    parent=request_data['parent'],
-                    names=request_data['names'])
+    node = Node(id=request_data['id'],
+                parent=request_data['parent'],
+                names=request_data['names'])
 
-    graph.add_ent(entity.parent, entity.names)
+    graph.add_ent(node.parent, node.names)
 
     return '', 201
 
 
-@app.route('/api/1.3.0/entity', methods=['PUT'])
-def put_entity() -> str:
+@app.route('/api/1.3.0/nodes', methods=['PUT'])
+def put_node() -> str:
     request_data: dict = request.get_json()
 
-    entity = Entity(id=request_data['id'],
-                    parent=request_data['parent'],
-                    names=request_data['names'])
+    node = Node(id=request_data['id'],
+                parent=request_data['parent'],
+                names=request_data['names'])
 
-    graph.update_ent(entity.id, entity.parent, entity.names)
+    graph.update_ent(node.id, node.parent, node.names)
+
+    return ''
+
+
+@app.route('/api/1.3.0/nodes/<int:node_id>', methods=['DELETE'])
+def delete_node(node_id: int) -> str:
+    graph.delete_ent(node_id)
 
     return ''
 
 
-@app.route('/api/1.3.0/entity/<int:entity_id>', methods=['DELETE'])
-def delete_entity(entity_id: int) -> str:
-    graph.delete_ent(entity_id)
-
-    return ''
-
+#
+# Matches
+#
 
 @app.route('/api/1.3.0/matches', methods=['GET'])
 def get_matches() -> dict[str, list[Match]]:
