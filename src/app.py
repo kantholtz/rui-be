@@ -2,7 +2,6 @@ import os
 import zipfile
 from dataclasses import dataclass
 
-import yaml
 from draug.homag.graph import Graph
 from draug.homag.text import Match, Matches
 from flask import Flask, request
@@ -75,65 +74,13 @@ def put_upload() -> str:
 
     extracted_dir = os.path.splitext(upload_path)[0]
 
-    meta_yml: str = os.path.join(extracted_dir, 'meta.yml')
-    nodes_txt: str = os.path.join(extracted_dir, 'nodes.txt')
-    edges_txt: str = os.path.join(extracted_dir, 'edges.txt')
+    graph = Graph.load(extracted_dir)
+
     match_txt: str = os.path.join(extracted_dir, 'match.txt')
-
-    with open(meta_yml) as f:
-        meta = yaml.load(f, Loader=yaml.FullLoader)
-
-    nodes = parse_nodes_txt(nodes_txt)
-    edges = parse_edges_txt(edges_txt)
     matches = parse_match_txt(match_txt)
-
-    graph = Graph.load_from_memory(meta, nodes, edges)
     matches_store = Matches.from_matches(matches)
 
     return ''
-
-
-def parse_nodes_txt(nodes_txt: str) -> list[tuple[int, dict]]:
-    """
-    Parse Nodes TXT whose lines have the following format:
-
-    node {data} ...
-    """
-
-    def parse_line(line: str) -> tuple[int, dict]:
-        chunks = line.split(' ', maxsplit=1)
-
-        node_id = int(chunks[0])
-        data = eval(chunks[1])
-
-        return node_id, data
-
-    with open(nodes_txt, encoding='utf-8') as f:
-        nodes = [parse_line(line) for line in f.readlines()]
-
-    return nodes
-
-
-def parse_edges_txt(edges_txt: str) -> list[tuple[int, int, int]]:
-    """
-    Parse Edges TXT whose lines have the following format:
-
-    head tail rel
-    """
-
-    def parse_line(line: str) -> tuple[int, int, int]:
-        chunks = line.split(' ')
-
-        head = int(chunks[0])
-        tail = int(chunks[1])
-        rel = int(chunks[2])
-
-        return head, tail, rel
-
-    with open(edges_txt, encoding='utf-8') as f:
-        edges = [parse_line(line) for line in f.readlines()]
-
-    return edges
 
 
 def parse_match_txt(match_txt: str) -> list[Match]:
