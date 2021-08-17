@@ -3,7 +3,7 @@ import zipfile
 from dataclasses import dataclass
 
 import yaml
-from draug.homag.graph import RELATIONS, Graph
+from draug.homag.graph import Graph
 from draug.homag.text import Match, Matches
 from flask import Flask, request
 from flask_cors import CORS
@@ -25,9 +25,9 @@ app.config['JSON_SORT_KEYS'] = False  # Simplify debugging in frontend
 #
 
 meta = {
-    'name': 'symptax.v5',
-    'reflexive': (RELATIONS['synonym'],),
-    'relmap': {rid: name for name, rid in RELATIONS.items()}
+    'name': 'symptax.v6',
+    'reflexive': [Graph.RELATIONS.synonym.value],
+    'relmap': {m.value: m.name for m in Graph.RELATIONS}
 }
 
 graph = Graph(meta)
