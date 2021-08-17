@@ -2,7 +2,7 @@ openapi: 3.0.0
 
 info:
   description: API for the RUI backend
-  version: '1.2.0'
+  version: '1.3.0'
   title: RUI
   contact:
     email: tobias.uhmann@gmail.com
@@ -28,16 +28,7 @@ paths:
             schema:
               type: object
               properties:
-                metaYml:
-                  type: string
-                  format: binary
-                nodesTxt:
-                  type: string
-                  format: binary
-                edgesTxt:
-                  type: string
-                  format: binary
-                matchTxt:
+                symptaxCoreZip:
                   type: string
                   format: binary
       responses:

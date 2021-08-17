@@ -58,7 +58,7 @@ class DeepEntity:
     children: list
 
 
-@app.route('/api/1.2.0/upload', methods=['PUT'])
+@app.route('/api/1.3.0/upload', methods=['PUT'])
 def put_upload() -> str:
     global graph, matches_store
 
@@ -163,7 +163,7 @@ def parse_match_txt(match_txt: str) -> list[Match]:
     return matches
 
 
-@app.route('/api/1.2.0/entities', methods=['GET'])
+@app.route('/api/1.3.0/entities', methods=['GET'])
 def get_entities() -> dict[str, list[DeepEntity]]:
     root_entity_ids = graph.find_root_ents()
 
@@ -180,7 +180,7 @@ def get_entities() -> dict[str, list[DeepEntity]]:
     return {'entities': [id_to_entity(root_node) for root_node in root_entity_ids]}
 
 
-@app.route('/api/1.2.0/entity', methods=['POST'])
+@app.route('/api/1.3.0/entity', methods=['POST'])
 def post_entity() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
@@ -193,7 +193,7 @@ def post_entity() -> tuple[str, int]:
     return '', 201
 
 
-@app.route('/api/1.2.0/entity', methods=['PUT'])
+@app.route('/api/1.3.0/entity', methods=['PUT'])
 def put_entity() -> str:
     request_data: dict = request.get_json()
 
@@ -206,14 +206,14 @@ def put_entity() -> str:
     return ''
 
 
-@app.route('/api/1.2.0/entity/<int:entity_id>', methods=['DELETE'])
+@app.route('/api/1.3.0/entity/<int:entity_id>', methods=['DELETE'])
 def delete_entity(entity_id: int) -> str:
     graph.delete_ent(entity_id)
 
     return ''
 
 
-@app.route('/api/1.2.0/matches', methods=['GET'])
+@app.route('/api/1.3.0/matches', methods=['GET'])
 def get_matches() -> dict[str, list[Match]]:
     global matches_store
 
