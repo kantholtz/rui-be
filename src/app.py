@@ -155,9 +155,11 @@ def post_node() -> tuple[str, int]:
 
     node = Node(id=request_data['id'],
                 parent=request_data['parent'],
-                names=request_data['names'])
+                entities=[Entity(ent['id'], ent['node'], ent['name'])
+                          for ent in request_data['entities']])
 
-    graph.add_ent(node.parent, node.names)
+    graph.add_node(names=[ent.name for ent in node.entities],
+                   parent=node.parent)
 
     return '', 201
 
