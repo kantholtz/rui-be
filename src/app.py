@@ -1,5 +1,6 @@
+import os
+import zipfile
 from dataclasses import dataclass
-from typing import Iterator
 
 import yaml
 from draug.homag.graph import RELATIONS, Graph
@@ -7,6 +8,7 @@ from draug.homag.text import Match, Matches
 from flask import Flask, request
 from flask_cors import CORS
 from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
 
 #
 # Set up app object
@@ -60,24 +62,38 @@ class DeepEntity:
 def put_upload() -> str:
     global graph, matches_store
 
-    meta_yml: FileStorage = request.files['metaYml']
-    nodes_txt: FileStorage = request.files['nodesTxt']
-    edges_txt: FileStorage = request.files['edgesTxt']
-    match_txt: FileStorage = request.files['matchTxt']
+    symptax_core_zip: FileStorage = request.files['symptaxCoreZip']
 
-    meta = yaml.load(meta_yml.stream, Loader=yaml.FullLoader)
+    upload_filename = secure_filename(symptax_core_zip.filename)
+    upload_dir = os.getcwd()
+    upload_path = os.path.join(upload_dir, upload_filename)
+
+    symptax_core_zip.save(upload_path)
+
+    with zipfile.ZipFile(os.path.join(upload_dir, upload_filename), 'r') as zip_ref:
+        zip_ref.extractall(upload_dir)
+
+    extracted_dir = os.path.splitext(upload_path)[0]
+
+    meta_yml: str = os.path.join(extracted_dir, 'meta.yml')
+    nodes_txt: str = os.path.join(extracted_dir, 'nodes.txt')
+    edges_txt: str = os.path.join(extracted_dir, 'edges.txt')
+    match_txt: str = os.path.join(extracted_dir, 'match.txt')
+
+    with open(meta_yml) as f:
+        meta = yaml.load(f, Loader=yaml.FullLoader)
+
     nodes = parse_nodes_txt(nodes_txt)
     edges = parse_edges_txt(edges_txt)
+    matches = parse_match_txt(match_txt)
 
     graph = Graph.load_from_memory(meta, nodes, edges)
-
-    matches = parse_match_txt(match_txt)
     matches_store = Matches.from_matches(matches)
 
     return ''
 
 
-def parse_nodes_txt(nodes_txt: FileStorage) -> Iterator[tuple[int, dict]]:
+def parse_nodes_txt(nodes_txt: str) -> list[tuple[int, dict]]:
     """
     Parse Nodes TXT whose lines have the following format:
 
@@ -92,10 +108,13 @@ def parse_nodes_txt(nodes_txt: FileStorage) -> Iterator[tuple[int, dict]]:
 
         return node_id, data
 
-    return (parse_line(line.decode('utf-8')) for line in nodes_txt.stream)
+    with open(nodes_txt, encoding='utf-8') as f:
+        nodes = [parse_line(line) for line in f.readlines()]
+
+    return nodes
 
 
-def parse_edges_txt(edges_txt: FileStorage) -> Iterator[tuple[int, int, int]]:
+def parse_edges_txt(edges_txt: str) -> list[tuple[int, int, int]]:
     """
     Parse Edges TXT whose lines have the following format:
 
@@ -111,10 +130,13 @@ def parse_edges_txt(edges_txt: FileStorage) -> Iterator[tuple[int, int, int]]:
 
         return head, tail, rel
 
-    return (parse_line(line.decode('utf-8')) for line in edges_txt.stream)
+    with open(edges_txt, encoding='utf-8') as f:
+        edges = [parse_line(line) for line in f.readlines()]
+
+    return edges
 
 
-def parse_match_txt(match_txt: FileStorage) -> Iterator[Match]:
+def parse_match_txt(match_txt: str) -> list[Match]:
     """
     Parse Nodes TXT whose lines have the following format:
 
@@ -135,7 +157,10 @@ def parse_match_txt(match_txt: FileStorage) -> Iterator[Match]:
 
         return Match(entity, mention, ticket, phrase_id, phrase_text)
 
-    return (parse_line(line.decode('utf-8')) for line in match_txt.stream)
+    with open(match_txt, encoding='utf-8') as f:
+        matches = [parse_line(line) for line in f.readlines()]
+
+    return matches
 
 
 @app.route('/api/1.2.0/entities', methods=['GET'])
