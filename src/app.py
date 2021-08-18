@@ -164,8 +164,8 @@ def post_node() -> tuple[str, int]:
     return '', 201
 
 
-@app.route('/api/1.4.0/nodes', methods=['PUT'])
-def put_node() -> str:
+@app.route('/api/1.4.0/nodes', methods=['PATCH'])
+def patch_node() -> str:
     request_data: dict = request.get_json()
 
     node = Node(id=request_data['id'],
@@ -187,6 +187,25 @@ def delete_node(node_id: int) -> str:
 #
 # Entities
 #
+
+@app.route('/api/1.4.0/entities', methods=['POST'])
+def post_node() -> tuple[str, int]:
+    request_data: dict = request.get_json()
+
+    entity = Entity(id=request_data['id'],
+                    node=request_data['node'],
+                    name=request_data['name'])
+
+    graph.add_name(entity.id, entity.name)
+
+    return '', 201
+
+
+@app.route('/api/1.4.0/entities/<int:entity_id>', methods=['DELETE'])
+def delete_node(entity_id: int) -> str:
+    graph.delete_name(entity_id)
+
+    return ''
 
 
 #
