@@ -76,13 +76,13 @@ def get_root():
 def put_upload() -> str:
     global graph, matches_store
 
-    symptax_core_zip: FileStorage = request.files['symptaxCoreZip']
+    symptax_upload_zip: FileStorage = request.files['symptaxUploadZip']
 
-    upload_filename = secure_filename(symptax_core_zip.filename)
+    upload_filename = secure_filename(symptax_upload_zip.filename)
     upload_dir = os.getcwd()
     upload_path = os.path.join(upload_dir, upload_filename)
 
-    symptax_core_zip.save(upload_path)
+    symptax_upload_zip.save(upload_path)
 
     with zipfile.ZipFile(os.path.join(upload_dir, upload_filename), 'r') as zip_ref:
         zip_ref.extractall(upload_dir)
