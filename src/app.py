@@ -161,7 +161,7 @@ def delete_node(node_id: int) -> str:
 #
 
 @app.route('/api/1.4.0/entities', methods=['POST'])
-def post_node() -> tuple[str, int]:
+def post_entity() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
     entity = Entity(id=request_data['id'],
@@ -174,7 +174,7 @@ def post_node() -> tuple[str, int]:
 
 
 @app.route('/api/1.4.0/entities/<int:entity_id>', methods=['DELETE'])
-def delete_node(entity_id: int) -> str:
+def delete_entity(entity_id: int) -> str:
     graph.delete_name(entity_id)
 
     return ''
@@ -206,7 +206,7 @@ def get_matches() -> dict[str, list[Match]]:
     # Get matches from draug and apply pagination
     #
 
-    matches = list(matches_store.get_entity_matches(entity))
+    matches = list(matches_store.by_eid(entity))
 
     if offset and limit:
         matches = matches[offset:(offset + limit)]
