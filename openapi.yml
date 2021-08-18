@@ -2,7 +2,7 @@ openapi: 3.0.0
 
 info:
   description: API for the RUI backend
-  version: '1.3.0'
+  version: 1.4.0
   title: RUI
   contact:
     email: tobias.uhmann@gmail.com
@@ -10,6 +10,7 @@ info:
 tags:
   - name: upload
     description: Upload initial taxonomy and matches
+  - name: nodes
   - name: entities
   - name: matches
 
@@ -23,65 +24,105 @@ paths:
       summary: Put taxonomy and matches
       operationId: putUpload
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                symptaxCoreZip:
-                  type: string
-                  format: binary
+              $ref: '#/components/schemas/Upload'
       responses:
         '200':
           description: Put taxonomy and matches successfully
 
-  /entities:
+  /nodes:
 
     get:
       tags:
-        - entities
+        - nodes
       summary: |
-        Get the root entities, enriched by their recursively enriched
-        child entities
-      operationId: getEntities
+        Get the root nodes, enriched by their recursively enriched
+        child nodes
+      operationId: getNodes
       responses:
         '200':
-          description: Got root entities successfully
+          description: Got root nodes successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  entities:
+                  rootNodes:
                     type: array
                     items:
-                      $ref: '#/components/schemas/DeepEntity'
+                      $ref: '#/components/schemas/DeepNode'
 
-  /entity:
+    post:
+      tags:
+        - nodes
+      operationId: postNode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodePost'
+      responses:
+        '201':
+          description: Posted node successfully
+
+  /nodes/{nodeId}:
+
+    patch:
+      tags:
+        - nodes
+      summary: Patch node
+      operationId: patchNode
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodePatch'
+      responses:
+        '200':
+          description: Patched node successfully
+
+    delete:
+      tags:
+        - nodes
+      summary: Delete node
+      operationId: deleteNode
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted node successfully
+
+  /entities:
 
     post:
       tags:
         - entities
-      summary: Post entity
       operationId: postEntity
       requestBody:
-        $ref: '#/components/requestBodies/Entity'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityPost'
       responses:
         '201':
           description: Posted entity successfully
 
-    put:
-      tags:
-        - entities
-      summary: Put entity
-      operationId: putEntity
-      requestBody:
-        $ref: '#/components/requestBodies/Entity'
-      responses:
-        '200':
-          description: Put entity successfully
-
-  '/entity/{entityId}':
+  /entities/{entityId}:
 
     delete:
       tags:
@@ -94,7 +135,6 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64
       responses:
         '200':
           description: Deleted entity successfully
@@ -108,9 +148,9 @@ paths:
       operationId: getMatches
       parameters:
         - in: query
-          name: name
+          name: entity
           schema:
-            type: string
+            type: integer
           description: Entity whose matches to get
         - in: query
           name: offset
@@ -124,76 +164,113 @@ paths:
           description: Pagination Limit
       responses:
         '200':
-          description: Got matches for entity successfully
+          description: Got matches successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  matches:
+                  rootNodes:
                     type: array
                     items:
                       $ref: '#/components/schemas/Match'
 
 components:
-
   schemas:
 
-    Entity:
+    # Upload
+
+    Upload:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
+        symptaxUploadZip:
+          type: string
+          format: binary
+
+    # Node
+
+    NodePost:
+      description: Node as posted individually (no ID)
+      type: object
+      properties:
         parent:
           type: integer
-          format: int64
-        name:
-          type: string
-          example: Short circuit
-
-    DeepEntity:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        parent:
-          type: integer
-          format: int64
-        names:
+        entities:
           type: array
           items:
-            type: string
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/DeepEntity'
+            $ref: '#/components/schemas/EntityPostNode'
 
-    Match:
-      type: object
-      properties:
-        entity:
-          type: string
-        mention:
-          type: string
-        ticket:
-          type: integer
-          format: int64
-        phrase:
-          type: object
+    Node:
+      description: Full node
+      allOf:
+        - $ref: '#/components/schemas/NodePost'
+        - type: object
           properties:
             id:
               type: integer
-              format: int64
-            text:
-              type: string
 
-  requestBodies:
+    DeepNode:
+      description: Full node plus recursively added children
+      allOf:
+        - $ref: '#/components/schemas/Node'
+        - type: object
+          properties:
+            children:
+              type: array
+              items:
+                $ref: '#/components/schemas/DeepNode'
+            entities:
+              type: array
+              items:
+                $ref: '#/components/schemas/Entity'
+
+    NodePatch:
+      properties:
+        parent:
+          type: integer
+
+    # Entity
+
+    EntityPostNode:
+      description: Entity as posted as part of a new node (no ID, no node)
+      type: object
+      properties:
+        name:
+          type: string
+
+    EntityPost:
+      description: Entity as posted individually (no ID)
+      allOf:
+        - $ref: '#/components/schemas/EntityPostNode'
+        - type: object
+          properties:
+            node:
+              type: integer
 
     Entity:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Entity'
+      description: Full entity
+      allOf:
+        - $ref: '#/components/schemas/EntityPost'
+        - type: object
+          properties:
+            id:
+              type: integer
+
+    # Match
+
+    Match:
+      description: Full match
+      type: object
+      properties:
+        ticket:
+          type: integer
+        eid:
+          type: integer
+        mention:
+          type: string
+        mention_idxs:
+          type: array
+          items:
+            type: integer
+        context:
+          type: string
