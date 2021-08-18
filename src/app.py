@@ -164,22 +164,20 @@ def post_node() -> tuple[str, int]:
     return '', 201
 
 
-@app.route('/api/1.4.0/nodes', methods=['PATCH'])
-def patch_node() -> str:
+@app.route('/api/1.4.0/nodes/<int:node_id>', methods=['PATCH'])
+def patch_node(node_id: int) -> str:
     request_data: dict = request.get_json()
 
-    node = Node(id=request_data['id'],
-                parent=request_data['parent'],
-                names=request_data['names'])
+    parent = request_data['parent']
 
-    graph.update_ent(node.id, node.parent, node.names)
+    graph.set_parent(node_id, parent)
 
     return ''
 
 
 @app.route('/api/1.4.0/nodes/<int:node_id>', methods=['DELETE'])
 def delete_node(node_id: int) -> str:
-    graph.delete_ent(node_id)
+    graph.delete_node(node_id)
 
     return ''
 
