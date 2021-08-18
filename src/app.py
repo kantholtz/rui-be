@@ -127,9 +127,9 @@ def get_nodes() -> dict[str, list[DeepNode]]:
 def post_node() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
-    node = Node(id=request_data['id'],
+    node = Node(id=0,
                 parent=request_data['parent'],
-                entities=[Entity(ent['id'], ent['node'], ent['name'])
+                entities=[Entity(0, 0, ent['name'])
                           for ent in request_data['entities']])
 
     graph.add_node(names=[ent.name for ent in node.entities],
@@ -164,7 +164,7 @@ def delete_node(node_id: int) -> str:
 def post_entity() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
-    entity = Entity(id=request_data['id'],
+    entity = Entity(id=0,
                     node=request_data['node'],
                     name=request_data['name'])
 
@@ -192,7 +192,7 @@ def get_matches() -> dict[str, list[Match]]:
     # Parse query params
     #
 
-    entity = request.args.get('entity')
+    entity = int(request.args.get('entity'))
 
     offset = request.args.get('offset')
     if offset:
