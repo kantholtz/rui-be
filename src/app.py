@@ -30,7 +30,7 @@ meta = {
 }
 
 graph = Graph(meta)
-matches_store = Matches()
+matches_store = Matches(graph)
 
 
 #
@@ -89,38 +89,12 @@ def put_upload() -> str:
 
     extracted_dir = os.path.splitext(upload_path)[0]
 
-    graph = Graph.load(extracted_dir)
+    graph = Graph.from_dir(extracted_dir)
 
     match_txt: str = os.path.join(extracted_dir, 'match.txt')
-    matches = _parse_match_txt(match_txt)
-    matches_store = Matches.from_matches(matches)
+    matches_store = Matches.from_file(match_txt, graph)
 
     return ''
-
-
-def _parse_match_txt(match_txt: str) -> list[Match]:
-    """
-    Parse Match TXT whose lines have the following format:
-
-    ticket|node_name|node_id|mention|mention_indexes|context
-    """
-
-    def parse_line(line: str) -> Match:
-        chunks = line.split('|')
-
-        ticket: int = int(chunks[0])
-        node_name: str = chunks[1]
-        node_id: int = int(chunks[2])
-        mention: str = chunks[3]
-        mention_indexes: tuple[int] = tuple(map(int, chunks[4].split()))
-        context: str = chunks[5]
-
-        return Match(ticket, node_id, node_name, mention, context, mention_indexes)
-
-    with open(match_txt, encoding='utf-8') as f:
-        matches = [parse_line(line) for line in f.readlines()]
-
-    return matches
 
 
 #
@@ -218,7 +192,7 @@ def get_matches() -> dict[str, list[Match]]:
     # Parse query params
     #
 
-    name = request.args.get('name')
+    entity = request.args.get('entity')
 
     offset = request.args.get('offset')
     if offset:
@@ -232,7 +206,7 @@ def get_matches() -> dict[str, list[Match]]:
     # Get matches from draug and apply pagination
     #
 
-    matches = list(matches_store.get_entity_matches(name))
+    matches = list(matches_store.get_entity_matches(entity))
 
     if offset and limit:
         matches = matches[offset:(offset + limit)]
