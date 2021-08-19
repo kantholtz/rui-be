@@ -64,7 +64,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"parent\": null,\r\n    \"entities\": [\r\n        {\r\n            \"name\": \"NEU 1\"\r\n        },\r\n        {\r\n            \"name\": \"NEU 2\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"parentId\": null,\r\n    \"entities\": [\r\n        {\r\n            \"name\": \"NEU 1\"\r\n        },\r\n        {\r\n            \"name\": \"NEU 2\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -94,7 +94,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"parent\": 0\r\n}\r\n",
+					"raw": "{\r\n    \"parentId\": 0\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -147,7 +147,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"node\": 0,\r\n    \"name\": \"NEW ENT 3\"\r\n}\r\n",
+					"raw": "{\r\n    \"nodeId\": 0,\r\n    \"name\": \"NEW ENT 3\"\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
