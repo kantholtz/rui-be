@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "/api/1.3.0/upload",
+			"name": "/upload",
 			"request": {
 				"method": "PUT",
 				"header": [],
@@ -14,14 +14,14 @@
 					"mode": "formdata",
 					"formdata": [
 						{
-							"key": "symptaxCoreZip",
+							"key": "symptaxUploadZip",
 							"type": "file",
-							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax_core.v5.zip"
+							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax_upload.v6.zip"
 						}
 					]
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.3.0/upload",
+					"raw": "http://localhost:5000/api/1.4.0/upload",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -29,7 +29,7 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.3.0",
+						"1.4.0",
 						"upload"
 					]
 				}
@@ -37,12 +37,12 @@
 			"response": []
 		},
 		{
-			"name": "/api/1.3.0/entities",
+			"name": "/nodes",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/1.3.0/entities",
+					"raw": "http://localhost:5000/api/1.4.0/nodes",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -50,21 +50,21 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.3.0",
-						"entities"
+						"1.4.0",
+						"nodes"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "/api/1.3.0/entity",
+			"name": "/nodes",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 0,\r\n    \"names\": [\"my entity\", \"a entity\"],\r\n    \"parent\": null\r\n}\r\n",
+					"raw": "{\r\n    \"parentId\": null,\r\n    \"entities\": [\r\n        {\r\n            \"name\": \"NEU 1\"\r\n        },\r\n        {\r\n            \"name\": \"NEU 2\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -72,7 +72,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.3.0/entity",
+					"raw": "http://localhost:5000/api/1.4.0/nodes",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -80,21 +80,21 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.3.0",
-						"entity"
+						"1.4.0",
+						"nodes"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "/api/1.3.0/entity",
+			"name": "/nodes/{nodeId}",
 			"request": {
-				"method": "PUT",
+				"method": "PATCH",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 1,\r\n    \"names\": [\"my entity\", \"b entity\"],\r\n    \"parent\": null\r\n}\r\n",
+					"raw": "{\r\n    \"parentId\": 0\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -102,7 +102,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.3.0/entity",
+					"raw": "http://localhost:5000/api/1.4.0/nodes/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -110,29 +110,8 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.3.0",
-						"entity"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/api/1.3.0/entity/:entity_id",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:5000/api/1.3.0/entity/1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.3.0",
-						"entity",
+						"1.4.0",
+						"nodes",
 						"1"
 					]
 				}
@@ -140,12 +119,12 @@
 			"response": []
 		},
 		{
-			"name": "/api/1.3.0/matches",
+			"name": "/nodes/{nodeId}",
 			"request": {
-				"method": "GET",
+				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/1.3.0/matches?name=schwach&offset=10&limit=10",
+					"raw": "http://localhost:5000/api/1.4.0/nodes/1",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -153,13 +132,87 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.3.0",
+						"1.4.0",
+						"nodes",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/entities",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"nodeId\": 0,\r\n    \"name\": \"NEW ENT 3\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/1.4.0/entities",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"1.4.0",
+						"entities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/entities/{entityId}",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/1.4.0/entities/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"1.4.0",
+						"entities",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/matches",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/1.4.0/matches?entity=153&offset=10&limit=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"1.4.0",
 						"matches"
 					],
 					"query": [
 						{
-							"key": "name",
-							"value": "schwach"
+							"key": "entity",
+							"value": "153"
 						},
 						{
 							"key": "offset",
