@@ -64,7 +64,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NodePost'
+              $ref: '#/components/schemas/PostNode'
       responses:
         '201':
           description: Posted node successfully
@@ -117,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EntityPost'
+              $ref: '#/components/schemas/PostEntity'
       responses:
         '201':
           description: Posted entity successfully
@@ -178,6 +178,89 @@ paths:
 components:
   schemas:
 
+    # Entity
+
+    Entity:
+      description: Full entity
+      type: object
+      properties:
+        id:
+          type: integer
+        nodeId:
+          type: integer
+        name:
+          type: string
+
+    PostEntity:
+      description: Entity as posted individually (no ID)
+      type: object
+      properties:
+        nodeId:
+          type: integer
+        name:
+          type: string
+
+    PostEntityNode:
+      description: Entity as posted as part of a new node (no ID, no node)
+      type: object
+      properties:
+        name:
+          type: string
+
+    # Match
+
+    Match:
+      description: Full match
+      type: object
+      properties:
+        entityId:
+          type: integer
+        ticket:
+          type: integer
+        context:
+          type: string
+        mention:
+          type: string
+        mention_indexes:
+          type: array
+          items:
+            type: integer
+
+    # Node
+
+    DeepNode:
+      description: Full node plus recursively added children
+      type: object
+      properties:
+        id:
+          type: integer
+        parentId:
+          type: integer
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entity'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeepNode'
+
+    NodePatch:
+      properties:
+        parentId:
+          type: integer
+
+    PostNode:
+      description: Node as posted individually (no ID)
+      type: object
+      properties:
+        parentId:
+          type: integer
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostEntityNode'
+
     # Upload
 
     Upload:
@@ -186,84 +269,3 @@ components:
         symptaxUploadZip:
           type: string
           format: binary
-
-    # Node
-
-    NodePost:
-      description: Node as posted individually (no ID)
-      type: object
-      properties:
-        parent:
-          type: integer
-        entities:
-          type: array
-          items:
-            $ref: '#/components/schemas/EntityPostNode'
-
-    DeepNode:
-      description: Full node plus recursively added children
-      allOf:
-        - $ref: '#/components/schemas/NodePost'
-        - type: object
-          properties:
-            id:
-              type: integer
-            children:
-              type: array
-              items:
-                $ref: '#/components/schemas/DeepNode'
-            entities:
-              type: array
-              items:
-                $ref: '#/components/schemas/Entity'
-
-    NodePatch:
-      properties:
-        parent:
-          type: integer
-
-    # Entity
-
-    EntityPostNode:
-      description: Entity as posted as part of a new node (no ID, no node)
-      type: object
-      properties:
-        name:
-          type: string
-
-    EntityPost:
-      description: Entity as posted individually (no ID)
-      allOf:
-        - $ref: '#/components/schemas/EntityPostNode'
-        - type: object
-          properties:
-            node:
-              type: integer
-
-    Entity:
-      description: Full entity
-      allOf:
-        - $ref: '#/components/schemas/EntityPost'
-        - type: object
-          properties:
-            id:
-              type: integer
-
-    # Match
-
-    Match:
-      description: Full match
-      type: object
-      properties:
-        ticket:
-          type: integer
-        eid:
-          type: integer
-        mention:
-          type: string
-        mentionIdxs:
-          type: array
-          items:
-            type: integer
-        context:
-          type: string
