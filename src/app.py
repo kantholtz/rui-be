@@ -183,8 +183,8 @@ def get_matches() -> Response:
     # Get matches from draug and apply pagination
     #
 
-    draug_matches = list(matches_store.by_eid(entity))
-    matches: list[Match] = [Match(match.eid, match.context, match.mention, list(match.mention_idxs), match.ticket)
+    draug_matches = matches_store.by_eid(entity)
+    matches: list[Match] = [Match(match.eid, match.ticket, match.context, match.mention, list(match.mention_idxs))
                             for match in draug_matches]
 
     if offset and limit:
