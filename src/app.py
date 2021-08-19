@@ -1,13 +1,19 @@
 import os
 import zipfile
-from dataclasses import dataclass
 
 from draug.homag.graph import Graph
-from draug.homag.text import Match, Matches
-from flask import Flask, request
+from draug.homag.text import Matches
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
+
+from src.models.entity.entity import Entity
+from src.models.entity.post_entity import PostEntitySchema, PostEntity
+from src.models.match.match import MatchSchema, Match
+from src.models.node.deep_node import DeepNode, DeepNodeSchema
+from src.models.node.node_patch import NodePatch, NodePatchSchema
+from src.models.node.post_node import PostNodeSchema, PostNode
 
 #
 # Set up app object
@@ -31,32 +37,6 @@ meta = {
 
 graph = Graph(meta)
 matches_store = Matches(graph)
-
-
-#
-# Dataclasses
-#
-
-@dataclass
-class Entity:
-    id: int
-    node: int
-    name: str
-
-
-@dataclass
-class Node:
-    id: int
-    parent: int
-    entities: list[Entity]
-
-
-@dataclass
-class DeepNode:
-    id: int
-    parent: int
-    entities: list[Entity]
-    children: list
 
 
 #
@@ -102,7 +82,7 @@ def put_upload() -> str:
 #
 
 @app.route('/api/1.4.0/nodes', methods=['GET'])
-def get_nodes() -> dict[str, list[DeepNode]]:
+def get_nodes() -> Response:
     root_node_ids = graph.find_root_ents()
 
     #
@@ -113,27 +93,26 @@ def get_nodes() -> dict[str, list[DeepNode]]:
         entity_ids = graph.node_eids(node_id)
 
         return DeepNode(id=node_id,
-                        parent=graph.get_parent(node_id),
+                        parent_id=graph.get_parent(node_id),
                         entities=[Entity(entity_id, node_id, graph.entity_name(entity_id))
                                   for entity_id in entity_ids],
                         children=[deep_node_from_node_id(child)
                                   for child in graph.get_children(node_id)])
 
-    return {'root_nodes': [deep_node_from_node_id(root_node_id)
-                           for root_node_id in root_node_ids]}
+    deep_nodes: list[DeepNode] = [deep_node_from_node_id(root_node_id)
+                                  for root_node_id in root_node_ids]
+
+    return jsonify(DeepNodeSchema(many=True).dump(deep_nodes))
 
 
 @app.route('/api/1.4.0/nodes', methods=['POST'])
 def post_node() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
-    node = Node(id=0,
-                parent=request_data['parent'],
-                entities=[Entity(0, 0, ent['name'])
-                          for ent in request_data['entities']])
+    new_node: PostNode = PostNodeSchema().load(request_data)
 
-    graph.add_node(names=[ent.name for ent in node.entities],
-                   parent=node.parent)
+    graph.add_node(names=[ent.name for ent in new_node.entities],
+                   parent=new_node.parent_id)
 
     return '', 201
 
@@ -142,9 +121,9 @@ def post_node() -> tuple[str, int]:
 def patch_node(node_id: int) -> str:
     request_data: dict = request.get_json()
 
-    parent = request_data['parent']
+    node_patch: NodePatch = NodePatchSchema().load(request_data)
 
-    graph.set_parent(node_id, parent)
+    graph.set_parent(node_id, node_patch.parent_id)
 
     return ''
 
@@ -164,11 +143,9 @@ def delete_node(node_id: int) -> str:
 def post_entity() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
-    entity = Entity(id=0,
-                    node=request_data['node'],
-                    name=request_data['name'])
+    new_entity: PostEntity = PostEntitySchema().load(request_data)
 
-    graph.add_name(entity.id, entity.name)
+    graph.add_name(new_entity.node_id, new_entity.name)
 
     return '', 201
 
@@ -185,7 +162,7 @@ def delete_entity(entity_id: int) -> str:
 #
 
 @app.route('/api/1.4.0/matches', methods=['GET'])
-def get_matches() -> dict[str, list[Match]]:
+def get_matches() -> Response:
     global matches_store
 
     #
@@ -206,7 +183,9 @@ def get_matches() -> dict[str, list[Match]]:
     # Get matches from draug and apply pagination
     #
 
-    matches = list(matches_store.by_eid(entity))
+    draug_matches = list(matches_store.by_eid(entity))
+    matches: list[Match] = [Match(match.eid, match.context, match.mention, list(match.mention_idxs), match.ticket)
+                            for match in draug_matches]
 
     if offset and limit:
         matches = matches[offset:(offset + limit)]
@@ -215,7 +194,7 @@ def get_matches() -> dict[str, list[Match]]:
     elif limit:
         matches = matches[:limit]
 
-    return {'matches': matches}
+    return jsonify(MatchSchema(many=True).dump(matches))
 
 
 #
