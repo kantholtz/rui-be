@@ -200,21 +200,14 @@ components:
           items:
             $ref: '#/components/schemas/EntityPostNode'
 
-    Node:
-      description: Full node
+    DeepNode:
+      description: Full node plus recursively added children
       allOf:
         - $ref: '#/components/schemas/NodePost'
         - type: object
           properties:
             id:
               type: integer
-
-    DeepNode:
-      description: Full node plus recursively added children
-      allOf:
-        - $ref: '#/components/schemas/Node'
-        - type: object
-          properties:
             children:
               type: array
               items:
@@ -268,7 +261,7 @@ components:
           type: integer
         mention:
           type: string
-        mention_idxs:
+        mentionIdxs:
           type: array
           items:
             type: integer
