@@ -48,12 +48,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  rootNodes:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/DeepNode'
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeepNode'
 
     post:
       tags:
@@ -168,12 +165,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  rootNodes:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Match'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
 
 components:
   schemas:
