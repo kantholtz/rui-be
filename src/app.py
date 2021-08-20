@@ -94,7 +94,8 @@ def get_nodes() -> Response:
 
         return DeepNode(id=node_id,
                         parent_id=graph.get_parent(node_id),
-                        entities=[Entity(entity_id, node_id, graph.entity_name(entity_id))
+                        entities=[Entity(entity_id, node_id, graph.entity_name(entity_id),
+                                         len(matches_store.by_eid(entity_id)))
                                   for entity_id in entity_ids],
                         children=[deep_node_from_node_id(child)
                                   for child in graph.get_children(node_id)])

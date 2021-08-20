@@ -184,6 +184,8 @@ components:
           type: integer
         name:
           type: string
+        matchesCount:
+          type: integer
 
     PostEntity:
       description: Entity as posted individually (no ID)
