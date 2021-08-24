@@ -52,7 +52,7 @@ def get_root():
 # Upload
 #
 
-@app.route('/api/1.4.0/upload', methods=['PUT'])
+@app.route('/api/1.5.0/upload', methods=['PUT'])
 def put_upload() -> str:
     global graph, matches_store
 
@@ -81,7 +81,7 @@ def put_upload() -> str:
 # Nodes
 #
 
-@app.route('/api/1.4.0/nodes', methods=['GET'])
+@app.route('/api/1.5.0/nodes', methods=['GET'])
 def get_nodes() -> Response:
     root_node_ids = graph.find_root_ents()
 
@@ -94,7 +94,8 @@ def get_nodes() -> Response:
 
         return DeepNode(id=node_id,
                         parent_id=graph.get_parent(node_id),
-                        entities=[Entity(entity_id, node_id, graph.entity_name(entity_id))
+                        entities=[Entity(entity_id, node_id, graph.entity_name(entity_id),
+                                         len(matches_store.by_eid(entity_id)))
                                   for entity_id in entity_ids],
                         children=[deep_node_from_node_id(child)
                                   for child in graph.get_children(node_id)])
@@ -105,7 +106,7 @@ def get_nodes() -> Response:
     return jsonify(DeepNodeSchema(many=True).dump(deep_nodes))
 
 
-@app.route('/api/1.4.0/nodes', methods=['POST'])
+@app.route('/api/1.5.0/nodes', methods=['POST'])
 def post_node() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
@@ -117,7 +118,7 @@ def post_node() -> tuple[str, int]:
     return '', 201
 
 
-@app.route('/api/1.4.0/nodes/<int:node_id>', methods=['PATCH'])
+@app.route('/api/1.5.0/nodes/<int:node_id>', methods=['PATCH'])
 def patch_node(node_id: int) -> str:
     request_data: dict = request.get_json()
 
@@ -128,7 +129,7 @@ def patch_node(node_id: int) -> str:
     return ''
 
 
-@app.route('/api/1.4.0/nodes/<int:node_id>', methods=['DELETE'])
+@app.route('/api/1.5.0/nodes/<int:node_id>', methods=['DELETE'])
 def delete_node(node_id: int) -> str:
     graph.delete_node(node_id)
 
@@ -139,7 +140,7 @@ def delete_node(node_id: int) -> str:
 # Entities
 #
 
-@app.route('/api/1.4.0/entities', methods=['POST'])
+@app.route('/api/1.5.0/entities', methods=['POST'])
 def post_entity() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
@@ -150,7 +151,7 @@ def post_entity() -> tuple[str, int]:
     return '', 201
 
 
-@app.route('/api/1.4.0/entities/<int:entity_id>', methods=['DELETE'])
+@app.route('/api/1.5.0/entities/<int:entity_id>', methods=['DELETE'])
 def delete_entity(entity_id: int) -> str:
     graph.delete_name(entity_id)
 
@@ -161,7 +162,7 @@ def delete_entity(entity_id: int) -> str:
 # Matches
 #
 
-@app.route('/api/1.4.0/matches', methods=['GET'])
+@app.route('/api/1.5.0/matches', methods=['GET'])
 def get_matches() -> Response:
     global matches_store
 

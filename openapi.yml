@@ -2,7 +2,7 @@ openapi: 3.0.0
 
 info:
   description: API for the RUI backend
-  version: 1.4.0
+  version: 1.5.0
   title: RUI
   contact:
     email: tobias.uhmann@gmail.com
@@ -184,6 +184,8 @@ components:
           type: integer
         name:
           type: string
+        matchesCount:
+          type: integer
 
     PostEntity:
       description: Entity as posted individually (no ID)

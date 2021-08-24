@@ -12,6 +12,7 @@ class Entity:
     node_id: int
 
     name: str
+    matches_count: int
 
 
 class EntitySchema(CamelCaseSchema):
@@ -20,6 +21,7 @@ class EntitySchema(CamelCaseSchema):
     node_id = fields.Integer(required=True)
 
     name = fields.String(required=True)
+    matches_count = fields.Integer(required=True)
 
     @post_load
     def make_obj(self, data, **kwargs) -> Entity:
