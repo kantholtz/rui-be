@@ -2,6 +2,7 @@ import os
 import zipfile
 
 from draug.homag.graph import Graph
+from draug.homag.model import Predictions
 from draug.homag.text import Matches
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
@@ -37,6 +38,7 @@ meta = {
 
 graph = Graph(meta)
 matches_store = Matches(graph)
+predictions_store = Predictions()
 
 
 #
@@ -54,7 +56,7 @@ def get_root():
 
 @app.route('/api/1.5.0/upload', methods=['PUT'])
 def put_upload() -> str:
-    global graph, matches_store
+    global graph, matches_store, predictions_store
 
     symptax_upload_zip: FileStorage = request.files['symptaxUploadZip']
 
@@ -73,6 +75,10 @@ def put_upload() -> str:
 
     match_txt: str = os.path.join(extracted_dir, 'match.txt')
     matches_store = Matches.from_file(match_txt, graph)
+
+    parent_csv: str = os.path.join(extracted_dir, 'parent.csv')
+    synonym_csv: str = os.path.join(extracted_dir, 'synonym.csv')
+    predictions_store = Predictions.from_files({parent_csv, synonym_csv})
 
     return ''
 
