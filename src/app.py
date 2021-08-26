@@ -19,6 +19,7 @@ from src.models.node.post_node import PostNodeSchema, PostNode
 #
 # Set up app object
 #
+from src.models.prediction.prediction import Prediction, PredictionSchema
 
 app = Flask(__name__)
 
@@ -191,8 +192,8 @@ def get_matches() -> Response:
     #
 
     draug_matches = matches_store.by_eid(entity)
-    matches: list[Match] = [Match(match.eid, match.ticket, match.context, match.mention, list(match.mention_idxs))
-                            for match in draug_matches]
+    matches: list[Match] = [Match(m.eid, m.ticket, m.context, m.mention, list(m.mention_idxs))
+                            for m in draug_matches]
 
     if offset and limit:
         matches = matches[offset:(offset + limit)]
@@ -202,6 +203,44 @@ def get_matches() -> Response:
         matches = matches[:limit]
 
     return jsonify(MatchSchema(many=True).dump(matches))
+
+
+#
+# Predictions
+#
+
+@app.route('/api/1.6.0/nodes/<int:node_id>/predictions', methods=['GET'])
+def get_predictions(node_id: int) -> Response:
+    global predictions_store
+
+    #
+    # Parse query params
+    #
+
+    offset = request.args.get('offset')
+    if offset:
+        offset = int(offset)
+
+    limit = request.args.get('limit')
+    if limit:
+        limit = int(limit)
+
+    #
+    # Get predictions from draug and apply pagination
+    #
+
+    draug_predictions = predictions_store.by_nid(node_id)
+    predictions: list[Prediction] = [Prediction(p.score, p.relation, p.candidate)
+                                     for p in draug_predictions]
+
+    if offset and limit:
+        predictions = predictions[offset:(offset + limit)]
+    elif offset:
+        predictions = predictions[offset:]
+    elif limit:
+        predictions = predictions[:limit]
+
+    return jsonify(PredictionSchema(many=True).dump(predictions))
 
 
 #
