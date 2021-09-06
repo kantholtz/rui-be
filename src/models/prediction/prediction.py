@@ -5,6 +5,7 @@ from marshmallow import fields, post_load
 from marshmallow_enum import EnumField
 
 from src.models.camel_case_schema import CamelCaseSchema
+from src.models.node.node import Node, NodeSchema
 
 
 class Relation(Enum):
@@ -14,7 +15,7 @@ class Relation(Enum):
 
 @dataclass
 class Prediction:
-    node_id: int
+    node: Node
 
     score: float
     relation: Relation
@@ -22,8 +23,8 @@ class Prediction:
 
 
 class PredictionSchema(CamelCaseSchema):
-    node_id = fields.Integer(required=True)
-    
+    node = fields.Nested(NodeSchema, required=True)
+
     score = fields.Float(required=True)
     relation = EnumField(Relation, required=True)
     candidate = fields.String(required=True)

@@ -114,18 +114,6 @@ def get_nodes() -> Response:
     return jsonify(DeepNodeSchema(many=True).dump(deep_nodes))
 
 
-@app.route('/api/1.6.0/nodes/<int:node_id>', methods=['GET'])
-def get_node(node_id: int) -> Response:
-    entity_ids = graph.node_eids(node_id)
-
-    node = Node(id=node_id,
-                parent_id=graph.get_parent(node_id),
-                entities=[Entity(entity_id, node_id, graph.entity_name(entity_id), len(matches_store.by_eid(entity_id)))
-                          for entity_id in entity_ids])
-
-    return jsonify(DeepNodeSchema().dump(node))
-
-
 @app.route('/api/1.6.0/nodes', methods=['POST'])
 def post_node() -> tuple[str, int]:
     request_data: dict = request.get_json()
@@ -242,16 +230,38 @@ def get_predictions(node_id: int) -> Response:
     # Get predictions from draug and apply pagination
     #
 
-    draug_predictions = predictions_store.by_nid(node_id)
-    predictions: list[Prediction] = [Prediction(p.predicted_nid, p.score_norm, p.relation, p.candidate)
-                                     for p in draug_predictions]
+    draug_predictions = list(predictions_store.by_nid(node_id))
 
     if offset and limit:
-        predictions = predictions[offset:(offset + limit)]
+        draug_predictions = draug_predictions[offset:(offset + limit)]
     elif offset:
-        predictions = predictions[offset:]
+        draug_predictions = draug_predictions[offset:]
     elif limit:
-        predictions = predictions[:limit]
+        draug_predictions = draug_predictions[:limit]
+
+    #
+    # Add information about predicted node
+    #
+
+    predictions: list[Prediction] = []
+    for draug_prediction in draug_predictions:
+        pred_node_id = draug_prediction.predicted_nid
+
+        pred_node_entity_ids = graph.node_eids(pred_node_id)
+        pred_node_entities = [Entity(id=pred_entity_id,
+                                     node_id=node_id,
+                                     name=graph.entity_name(pred_entity_id),
+                                     matches_count=len(matches_store.by_eid(pred_entity_id)))
+                              for pred_entity_id in pred_node_entity_ids]
+
+        pred_node = Node(id=node_id,
+                         parent_id=graph.get_parent(node_id),
+                         entities=pred_node_entities)
+
+        predictions.append(Prediction(node=pred_node,
+                                      score=draug_prediction.score,
+                                      relation=draug_prediction.relation,
+                                      candidate=draug_prediction.candidate))
 
     return jsonify(PredictionSchema(many=True).dump(predictions))
 
