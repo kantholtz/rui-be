@@ -2,7 +2,7 @@ openapi: 3.0.0
 
 info:
   description: API for the RUI backend
-  version: 1.5.0
+  version: 1.6.0
   title: RUI
   contact:
     email: tobias.uhmann@gmail.com
@@ -67,6 +67,25 @@ paths:
           description: Posted node successfully
 
   /nodes/{nodeId}:
+
+    get:
+      tags:
+        - nodes
+      summary: Get the specified node
+      operationId: getNode
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Got node successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
 
     patch:
       tags:
@@ -223,6 +242,19 @@ components:
             type: integer
 
     # Node
+
+    Node:
+      description: Full node
+      type: object
+      properties:
+        id:
+          type: integer
+        parentId:
+          type: integer
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entity'
 
     DeepNode:
       description: Full node plus recursively added children

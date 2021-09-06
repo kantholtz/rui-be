@@ -13,6 +13,7 @@ from src.models.entity.entity import Entity
 from src.models.entity.post_entity import PostEntitySchema, PostEntity
 from src.models.match.match import MatchSchema, Match
 from src.models.node.deep_node import DeepNode, DeepNodeSchema
+from src.models.node.node import Node
 from src.models.node.node_patch import NodePatch, NodePatchSchema
 from src.models.node.post_node import PostNodeSchema, PostNode
 
@@ -111,6 +112,18 @@ def get_nodes() -> Response:
                                   for root_node_id in root_node_ids]
 
     return jsonify(DeepNodeSchema(many=True).dump(deep_nodes))
+
+
+@app.route('/api/1.6.0/nodes/<int:node_id>', methods=['GET'])
+def get_node(node_id: int) -> Response:
+    entity_ids = graph.node_eids(node_id)
+
+    node = Node(id=node_id,
+                parent_id=graph.get_parent(node_id),
+                entities=[Entity(entity_id, node_id, graph.entity_name(entity_id), len(matches_store.by_eid(entity_id)))
+                          for entity_id in entity_ids])
+
+    return jsonify(DeepNodeSchema().dump(node))
 
 
 @app.route('/api/1.6.0/nodes', methods=['POST'])

@@ -58,6 +58,28 @@
 			"response": []
 		},
 		{
+			"name": "/nodes/{nodeId}",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/1.6.0/nodes/0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"1.6.0",
+						"nodes",
+						"0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "/nodes",
 			"request": {
 				"method": "POST",
