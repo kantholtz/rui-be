@@ -230,7 +230,7 @@ def get_predictions(node_id: int) -> Response:
     #
 
     draug_predictions = predictions_store.by_nid(node_id)
-    predictions: list[Prediction] = [Prediction(p.score_norm, p.relation, p.candidate)
+    predictions: list[Prediction] = [Prediction(p.predicted_nid, p.score_norm, p.relation, p.candidate)
                                      for p in draug_predictions]
 
     if offset and limit:

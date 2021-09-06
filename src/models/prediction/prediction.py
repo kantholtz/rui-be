@@ -14,12 +14,16 @@ class Relation(Enum):
 
 @dataclass
 class Prediction:
+    node_id: int
+
     score: float
     relation: Relation
     candidate: str
 
 
 class PredictionSchema(CamelCaseSchema):
+    node_id = fields.Integer(required=True)
+    
     score = fields.Float(required=True)
     relation = EnumField(Relation, required=True)
     candidate = fields.String(required=True)
