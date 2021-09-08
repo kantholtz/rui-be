@@ -4,7 +4,7 @@ from itertools import islice
 
 import draug.homag.model
 from draug.homag.graph import Graph
-from draug.homag.model import Predictions
+from draug.homag.model import Prediction, Predictions, Relation
 from draug.homag.text import Matches
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
@@ -22,7 +22,8 @@ from src.models.node.post_node import PostNodeSchema, PostNode
 #
 # Set up app object
 #
-from src.models.prediction.prediction import Prediction, PredictionSchema
+from src.models.prediction.candidate_with_predictions import CandidateWithPredictionsSchema, CandidateWithPredictions
+from src.models.prediction.candidate_prediction import CandidatePrediction, CandidatePredictionSchema
 
 app = Flask(__name__)
 
@@ -233,18 +234,30 @@ def get_predictions(node_id: int) -> Response:
     #
 
     # candidate -> [draug.homag.model.Prediction]
-    cand_to_draug_preds: dict[str, list[Prediction]] = predictions_store.by_nid(node_id)
+    cand_to_draug_preds: dict[str, list[CandidatePrediction]] = predictions_store.by_nid(node_id)
     cand_to_draug_preds = _paginate_dict(cand_to_draug_preds, offset, limit)
 
     #
     # Add information about predicted node
     #
 
-    pred_from = _prediction_from_draug_prediction
-    cand_to_preds = {cand: [pred_from(draug_pred) for draug_pred in draug_preds]
-                     for cand, draug_preds in cand_to_draug_preds.items()}
+    cand_preds = []
 
-    return jsonify(PredictionSchema(many=True).dump(predictions))
+    for cand, draug_preds in cand_to_draug_preds:
+        parent_preds = []
+        synonym_preds = []
+
+        for draug_pred in draug_preds:
+            pred = _get_candiate_prediction(draug_pred)
+
+            if draug_pred.relation == Relation.PARENT:
+                parent_preds.append(pred)
+            elif draug_pred.relation == Relation.SYNONYM:
+                synonym_preds.append(pred)
+
+        cand_preds.append(CandidateWithPredictions(cand, parent_preds, synonym_preds))
+
+    return jsonify(CandidateWithPredictionsSchema(many=True).dump(cand_preds))
 
 
 def _paginate_dict(dict_: dict, offset: int, limit: int) -> dict:
@@ -260,8 +273,8 @@ def _paginate_dict(dict_: dict, offset: int, limit: int) -> dict:
     return {key: value for key, value in items}
 
 
-def _prediction_from_draug_prediction(draug_prediction: draug.homag.model.Prediction):
-    pred_node_id = draug_prediction.predicted_nid
+def _get_candiate_prediction(prediction: Prediction) -> CandidatePrediction:
+    pred_node_id = prediction.predicted_nid
 
     pred_node_entity_ids = graph.node_eids(pred_node_id)
     pred_node_entities = [Entity(id=pred_entity_id,
@@ -274,10 +287,24 @@ def _prediction_from_draug_prediction(draug_prediction: draug.homag.model.Predic
                      parent_id=graph.get_parent(pred_node_id),
                      entities=pred_node_entities)
 
-    return Prediction(node=pred_node,
-                      score=draug_prediction.score_norm,
-                      relation=draug_prediction.relation,
-                      candidate=draug_prediction.candidate)
+    return CandidatePrediction(score=prediction.score_norm, node=pred_node)
+
+
+def _get_candidate_with_predictions(candidate: str,
+                                    predictions: list[Prediction]
+                                    ) -> CandidateWithPredictions:
+    parent_predictions = []
+    synonym_predictions = []
+
+    for prediction in predictions:
+        candidate_prediction = _get_candiate_prediction(prediction)
+
+        if prediction.relation == Relation.PARENT:
+            parent_predictions.append(candidate_prediction)
+        elif prediction.relation == Relation.SYNONYM:
+            synonym_predictions.append(candidate_prediction)
+
+    return CandidateWithPredictions(candidate, parent_predictions, synonym_predictions)
 
 
 #
