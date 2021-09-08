@@ -1,6 +1,8 @@
 import os
 import zipfile
+from itertools import islice
 
+import draug.homag.model
 from draug.homag.graph import Graph
 from draug.homag.model import Predictions
 from draug.homag.text import Matches
@@ -230,40 +232,52 @@ def get_predictions(node_id: int) -> Response:
     # Get predictions from draug and apply pagination
     #
 
-    draug_predictions = list(predictions_store.by_nid(node_id))
-
-    if offset and limit:
-        draug_predictions = draug_predictions[offset:(offset + limit)]
-    elif offset:
-        draug_predictions = draug_predictions[offset:]
-    elif limit:
-        draug_predictions = draug_predictions[:limit]
+    # candidate -> [draug.homag.model.Prediction]
+    cand_to_draug_preds: dict[str, list[Prediction]] = predictions_store.by_nid(node_id)
+    cand_to_draug_preds = _paginate_dict(cand_to_draug_preds, offset, limit)
 
     #
     # Add information about predicted node
     #
 
-    predictions: list[Prediction] = []
-    for draug_prediction in draug_predictions:
-        pred_node_id = draug_prediction.predicted_nid
-
-        pred_node_entity_ids = graph.node_eids(pred_node_id)
-        pred_node_entities = [Entity(id=pred_entity_id,
-                                     node_id=node_id,
-                                     name=graph.entity_name(pred_entity_id),
-                                     matches_count=len(matches_store.by_eid(pred_entity_id)))
-                              for pred_entity_id in pred_node_entity_ids]
-
-        pred_node = Node(id=node_id,
-                         parent_id=graph.get_parent(node_id),
-                         entities=pred_node_entities)
-
-        predictions.append(Prediction(node=pred_node,
-                                      score=draug_prediction.score,
-                                      relation=draug_prediction.relation,
-                                      candidate=draug_prediction.candidate))
+    pred_from = _prediction_from_draug_prediction
+    cand_to_preds = {cand: [pred_from(draug_pred) for draug_pred in draug_preds]
+                     for cand, draug_preds in cand_to_draug_preds.items()}
 
     return jsonify(PredictionSchema(many=True).dump(predictions))
+
+
+def _paginate_dict(dict_: dict, offset: int, limit: int) -> dict:
+    items = dict_.items()
+
+    if offset and limit:
+        items = islice(items, offset, offset + limit)
+    elif offset:
+        items = islice(items, offset, None)
+    elif limit:
+        items = islice(items, 0, limit)
+
+    return {key: value for key, value in items}
+
+
+def _prediction_from_draug_prediction(draug_prediction: draug.homag.model.Prediction):
+    pred_node_id = draug_prediction.predicted_nid
+
+    pred_node_entity_ids = graph.node_eids(pred_node_id)
+    pred_node_entities = [Entity(id=pred_entity_id,
+                                 node_id=pred_node_id,
+                                 name=graph.entity_name(pred_entity_id),
+                                 matches_count=len(matches_store.by_eid(pred_entity_id)))
+                          for pred_entity_id in pred_node_entity_ids]
+
+    pred_node = Node(id=pred_node_id,
+                     parent_id=graph.get_parent(pred_node_id),
+                     entities=pred_node_entities)
+
+    return Prediction(node=pred_node,
+                      score=draug_prediction.score_norm,
+                      relation=draug_prediction.relation,
+                      candidate=draug_prediction.candidate)
 
 
 #
