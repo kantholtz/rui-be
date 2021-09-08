@@ -2,7 +2,6 @@ import os
 import zipfile
 from itertools import islice
 
-import draug.homag.model
 from draug.homag.graph import Graph
 from draug.homag.model import Prediction, Predictions, Relation
 from draug.homag.text import Matches
@@ -18,12 +17,12 @@ from src.models.node.deep_node import DeepNode, DeepNodeSchema
 from src.models.node.node import Node
 from src.models.node.node_patch import NodePatch, NodePatchSchema
 from src.models.node.post_node import PostNodeSchema, PostNode
+from src.models.prediction.candidate_prediction import CandidatePrediction
+from src.models.prediction.candidate_with_predictions import CandidateWithPredictionsSchema, CandidateWithPredictions
 
 #
 # Set up app object
 #
-from src.models.prediction.candidate_with_predictions import CandidateWithPredictionsSchema, CandidateWithPredictions
-from src.models.prediction.candidate_prediction import CandidatePrediction, CandidatePredictionSchema
 
 app = Flask(__name__)
 
@@ -233,31 +232,17 @@ def get_predictions(node_id: int) -> Response:
     # Get predictions from draug and apply pagination
     #
 
-    # candidate -> [draug.homag.model.Prediction]
-    cand_to_draug_preds: dict[str, list[CandidatePrediction]] = predictions_store.by_nid(node_id)
-    cand_to_draug_preds = _paginate_dict(cand_to_draug_preds, offset, limit)
+    candidate_to_predictions: dict[str, list[Prediction]] = predictions_store.by_nid(node_id)
+    candidate_to_predictions = _paginate_dict(candidate_to_predictions, offset, limit)
 
     #
     # Add information about predicted node
     #
 
-    cand_preds = []
+    candidate_with_predictions_list = [_get_candidate_with_predictions(candidate, predictions)
+                                       for candidate, predictions in candidate_to_predictions.items()]
 
-    for cand, draug_preds in cand_to_draug_preds:
-        parent_preds = []
-        synonym_preds = []
-
-        for draug_pred in draug_preds:
-            pred = _get_candiate_prediction(draug_pred)
-
-            if draug_pred.relation == Relation.PARENT:
-                parent_preds.append(pred)
-            elif draug_pred.relation == Relation.SYNONYM:
-                synonym_preds.append(pred)
-
-        cand_preds.append(CandidateWithPredictions(cand, parent_preds, synonym_preds))
-
-    return jsonify(CandidateWithPredictionsSchema(many=True).dump(cand_preds))
+    return jsonify(CandidateWithPredictionsSchema(many=True).dump(candidate_with_predictions_list))
 
 
 def _paginate_dict(dict_: dict, offset: int, limit: int) -> dict:

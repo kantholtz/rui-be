@@ -155,7 +155,7 @@ paths:
 
   /nodes/{nodeId}/predictions:
 
-    patch:
+    get:
       tags:
         - prediction
       summary: Get predictions for node
@@ -184,7 +184,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Prediction'
+                  $ref: '#/components/schemas/CandidateWithPredictions'
 
   /upload:
 
@@ -306,19 +306,30 @@ components:
 
     # Prediction
 
-    Prediction:
+    CandidatePrediction:
+      description: Prediction for a certain candidate
+      type: object
+      properties:
+        score:
+          type: number
+        node:
+          $ref: '#/components/schemas/Node'
+
+
+    CandidateWithPredictions:
       description: Prediction about a node
       type: object
       properties:
-        node:
-          $ref: '#/components/schemas/Node'
-        score:
-          type: number
-        relation:
-          type: string
-          enum: [ PARENT, SYNONYM ]
         candidate:
           type: string
+        parentPredictions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandidatePrediction'
+        synonymPredictions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandidatePrediction'
 
     # Upload
 
