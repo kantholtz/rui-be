@@ -186,6 +186,28 @@ paths:
                 items:
                   $ref: '#/components/schemas/CandidateWithPredictions'
 
+  /predictions/{candidate}:
+
+    patch:
+      tags:
+        - prediction
+      summary: Dismiss prediction
+      operationId: patchPrediction
+      parameters:
+        - name: candidate
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PredictionPatch'
+      responses:
+        '200':
+          description: Prediction dismissed successfully
+
   /upload:
 
     put:
@@ -315,13 +337,14 @@ components:
         node:
           $ref: '#/components/schemas/Node'
 
-
     CandidateWithPredictions:
       description: Prediction about a node
       type: object
       properties:
         candidate:
           type: string
+        dismissed:
+          type: boolean
         parentPredictions:
           type: array
           items:
@@ -330,6 +353,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CandidatePrediction'
+
+    PredictionPatch:
+      description: Dismiss a prediction
+      type: object
+      properties:
+        dismissed:
+          type: boolean
+
+    PredictionResponse:
+      description: Paginated predictions about node plus total number of predictions
+      type: object
+      properties:
+        totalPredictions:
+          type: integer
+        predictions:
+          $ref: '#/components/schemas/PredictionResponse'
 
     # Upload
 

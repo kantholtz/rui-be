@@ -259,6 +259,37 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "/predictions/{candidate}",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"dismissed\": true\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/1.6.0/predictions/Bestellung%20Filter%20Druckregler%20%2B%20Griff%20f.%20Hauptschalter",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"1.6.0",
+						"predictions",
+						"Bestellung%20Filter%20Druckregler%20%2B%20Griff%20f.%20Hauptschalter"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

@@ -9,6 +9,7 @@ from src.models.prediction.candidate_prediction import CandidatePrediction, Cand
 @dataclass
 class CandidateWithPredictions:
     candidate: str
+    dismissed: bool
 
     parent_predictions: list[CandidatePrediction]
     synonym_predictions: list[CandidatePrediction]
@@ -16,6 +17,7 @@ class CandidateWithPredictions:
 
 class CandidateWithPredictionsSchema(CamelCaseSchema):
     candidate = fields.String(required=True)
+    dismissed = fields.Boolean(required=True)
 
     parent_predictions = fields.List(fields.Nested(CandidatePredictionSchema), required=True)
     synonym_predictions = fields.List(fields.Nested(CandidatePredictionSchema), required=True)

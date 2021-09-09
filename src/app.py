@@ -1,4 +1,5 @@
 import os
+import urllib
 import zipfile
 from itertools import islice
 
@@ -18,11 +19,12 @@ from src.models.node.node import Node
 from src.models.node.node_patch import NodePatch, NodePatchSchema
 from src.models.node.post_node import PostNodeSchema, PostNode
 from src.models.prediction.candidate_prediction import CandidatePrediction
-from src.models.prediction.candidate_with_predictions import CandidateWithPredictionsSchema, CandidateWithPredictions
-
+from src.models.prediction.candidate_with_predictions import CandidateWithPredictions
 #
 # Set up app object
 #
+from src.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
+from src.models.prediction.prediction_response import PredictionResponse, PredictionResponseSchema
 
 app = Flask(__name__)
 
@@ -232,17 +234,23 @@ def get_predictions(node_id: int) -> Response:
     # Get predictions from draug and apply pagination
     #
 
-    candidate_to_predictions: dict[str, list[Prediction]] = predictions_store.by_nid(node_id)
+    candidate_to_predictions: dict[str, list[Prediction]] = predictions_store.by_nid(node_id, filter_out_dismissed=True)
+
+    candidate_to_predictions_length = len(candidate_to_predictions)
+
     candidate_to_predictions = _paginate_dict(candidate_to_predictions, offset, limit)
 
     #
-    # Add information about predicted node
+    # Add information about predicted node and build response
     #
 
     candidate_with_predictions_list = [_get_candidate_with_predictions(candidate, predictions)
                                        for candidate, predictions in candidate_to_predictions.items()]
 
-    return jsonify(CandidateWithPredictionsSchema(many=True).dump(candidate_with_predictions_list))
+    prediction_response = PredictionResponse(total_predictions=candidate_to_predictions_length,
+                                             predictions=candidate_with_predictions_list)
+
+    return jsonify(PredictionResponseSchema().dump(prediction_response))
 
 
 def _paginate_dict(dict_: dict, offset: int, limit: int) -> dict:
@@ -289,7 +297,23 @@ def _get_candidate_with_predictions(candidate: str,
         elif prediction.relation == Relation.SYNONYM:
             synonym_predictions.append(candidate_prediction)
 
-    return CandidateWithPredictions(candidate, parent_predictions, synonym_predictions)
+    return CandidateWithPredictions(candidate, False, parent_predictions, synonym_predictions)
+
+
+@app.route('/api/1.6.0/predictions/<string:candidate>', methods=['PATCH'])
+def patch_prediction(candidate: str) -> tuple[str, int]:
+    global predictions_store
+
+    request_data: dict = request.get_json()
+
+    prediction_patch: PredictionPatch = PredictionPatchSchema().load(request_data)
+
+    if prediction_patch.dismissed and candidate in predictions_store.get_canidates():
+        predictions_store.dismiss_candidate(candidate)
+        return '', 200
+
+    else:
+        return '', 400
 
 
 #
