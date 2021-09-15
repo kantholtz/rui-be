@@ -19,7 +19,7 @@ class DeepNode:
 class DeepNodeSchema(CamelCaseSchema):
     id = fields.Integer(required=True)
 
-    parent_id = fields.Integer(required=True)
+    parent_id = fields.Integer(required=True, allow_none=True)
 
     entities = fields.List(fields.Nested(EntitySchema), required=True)
     children = fields.List(fields.Nested(lambda: DeepNodeSchema()), required=True)
