@@ -1,5 +1,6 @@
 import os
 import zipfile
+from pathlib import Path
 
 from draug.homag.graph import Graph
 from draug.homag.model import Predictions
@@ -17,8 +18,10 @@ upload = Blueprint('upload', __name__)
 def put_upload() -> str:
     symptax_upload_zip: FileStorage = request.files['symptaxUploadZip']
 
+    upload_dir = Path(os.path.join(os.getcwd(), 'data'))
+    upload_dir.mkdir(exist_ok=True)
+
     upload_filename = secure_filename(symptax_upload_zip.filename)
-    upload_dir = os.getcwd()
     upload_path = os.path.join(upload_dir, upload_filename)
 
     symptax_upload_zip.save(upload_path)

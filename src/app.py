@@ -8,11 +8,6 @@ from src.routes.predictions import predictions
 from src.routes.upload import upload
 
 
-def main():
-    app = create_app()
-    app.run()
-
-
 def create_app(config=None) -> Flask:
     app = Flask(__name__)
 
@@ -34,7 +29,3 @@ def create_app(config=None) -> Flask:
     app.register_blueprint(upload)
 
     return app
-
-
-if __name__ == '__main__':
-    main()
