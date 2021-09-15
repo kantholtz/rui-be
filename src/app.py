@@ -1,5 +1,4 @@
 import os
-import urllib
 import zipfile
 from itertools import islice
 
@@ -20,11 +19,12 @@ from src.models.node.node_patch import NodePatch, NodePatchSchema
 from src.models.node.post_node import PostNodeSchema, PostNode
 from src.models.prediction.candidate_prediction import CandidatePrediction
 from src.models.prediction.candidate_with_predictions import CandidateWithPredictions
+from src.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
+from src.models.prediction.prediction_response import PredictionResponse, PredictionResponseSchema
+
 #
 # Set up app object
 #
-from src.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
-from src.models.prediction.prediction_response import PredictionResponse, PredictionResponseSchema
 
 app = Flask(__name__)
 
