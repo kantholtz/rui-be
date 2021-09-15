@@ -13,8 +13,11 @@ def main():
     app.run()
 
 
-def create_app() -> Flask:
+def create_app(config=None) -> Flask:
     app = Flask(__name__)
+
+    if config:
+        app.config.update(config)
 
     CORS(app)
 
