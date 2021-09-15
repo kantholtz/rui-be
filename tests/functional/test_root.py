@@ -1,21 +1,14 @@
-from flask import Flask
-from flask_cors import CORS
+from src.app import create_app
 
 
 def test_root():
     """
-    GIVEN a Flask application
-    WHEN  the '/' page is requested (GET)
-    THEN  check that the response is valid
+    GIVEN   a Flask application
+    WHEN    requesting GET /
+    THEN    the response should contain "Server is up"
     """
 
-    app = Flask(__name__)
-    CORS(app)
-    app.config['JSON_SORT_KEYS'] = False
-
-    @app.route('/')
-    def get_root():
-        return 'Server is up'
+    app = create_app()
 
     # Create a test client using the Flask application configured for testing
     with app.test_client() as test_client:
