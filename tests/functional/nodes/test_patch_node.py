@@ -5,7 +5,7 @@ from tests.functional.common import upload
 
 def test_patch_node(client):
     """
-    GIVEN   a server with the demo data
+    GIVEN   a server with demo data
     WHEN    patching a root node
     AND     patching a child node
     THEN    those nodes should be deleted

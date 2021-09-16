@@ -5,7 +5,7 @@ from tests.functional.common import upload
 
 def test_post_entity(client):
     """
-    GIVEN   a server with the demo data
+    GIVEN   a server with demo data
     WHEN    posting an entity for a root node
     AND     posting an entity for a child node
     THEN    those entities should be added

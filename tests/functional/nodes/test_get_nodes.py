@@ -1,3 +1,4 @@
+from src.models.node.deep_node import DeepNodeSchema
 from tests.functional.common import upload
 
 
@@ -12,12 +13,14 @@ def test_get_nodes(client):
 
     assert response.status_code == 200
 
-    nodes_json = response.get_json()
+    nodes = response.get_json()
 
-    assert nodes_json == expected_nodes_json
+    assert nodes == expected_nodes
+
+    DeepNodeSchema(many=True).load(nodes)
 
 
-expected_nodes_json = [
+expected_nodes = [
     {
         'id': 0,
         'parentId': None,

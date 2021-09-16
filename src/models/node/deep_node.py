@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from marshmallow import fields, post_load
 
@@ -10,7 +11,7 @@ from src.models.entity.entity import EntitySchema, Entity
 class DeepNode:
     id: int
 
-    parent_id: int
+    parent_id: Optional[int]
 
     entities: list[Entity]
     children: list  # list[DeepNode]

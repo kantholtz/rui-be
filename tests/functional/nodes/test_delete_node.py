@@ -4,7 +4,7 @@ from tests.functional.common import upload
 
 def test_delete_node(client):
     """
-    GIVEN   a server with the demo data
+    GIVEN   a server with demo data
     WHEN    deleting a root node
     AND     deleting a child node
     THEN    those nodes should be deleted

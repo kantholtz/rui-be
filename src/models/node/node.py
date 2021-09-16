@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from marshmallow import fields, post_load
 
@@ -10,7 +11,7 @@ from src.models.entity.entity import EntitySchema, Entity
 class Node:
     id: int
 
-    parent_id: int
+    parent_id: Optional[int]
 
     entities: list[Entity]
 
@@ -18,7 +19,7 @@ class Node:
 class NodeSchema(CamelCaseSchema):
     id = fields.Integer(required=True)
 
-    parent_id = fields.Integer(required=True)
+    parent_id = fields.Integer(required=True, allow_none=True)
 
     entities = fields.List(fields.Nested(EntitySchema), required=True)
 

@@ -4,7 +4,7 @@ from tests.functional.common import upload
 
 def test_delete_entity(client):
     """
-    GIVEN   a server with the demo data
+    GIVEN   a server with demo data
     WHEN    deleting a node's first entity
     AND     deleting a node's last entity
     THEN    those entities should be deleted
