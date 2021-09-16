@@ -1,5 +1,5 @@
 from src.models.node.deep_node import DeepNodeSchema
-from tests.functional.common import upload
+from tests.functional.common import upload, ordered
 
 
 def test_delete_entity(client):
@@ -34,14 +34,14 @@ def test_delete_entity(client):
 
     get_response = client.get('http://localhost:5000/api/1.6.0/nodes')
 
-    get_response_json = get_response.get_json()
+    nodes = get_response.get_json()
 
-    assert get_response_json == expected_get_response_json
+    assert ordered(nodes) == ordered(expected_nodes)
 
-    DeepNodeSchema(many=True).load(get_response_json)
+    DeepNodeSchema(many=True).load(nodes)
 
 
-expected_get_response_json = [
+expected_nodes = [
     {
         'id': 0,
         'parentId': None,

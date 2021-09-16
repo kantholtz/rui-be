@@ -1,5 +1,5 @@
 from src.models.node.deep_node import DeepNodeSchema
-from tests.functional.common import upload
+from tests.functional.common import upload, ordered
 
 
 def test_get_nodes(client):
@@ -15,7 +15,7 @@ def test_get_nodes(client):
 
     nodes = response.get_json()
 
-    assert nodes == expected_nodes
+    assert ordered(nodes) == ordered(expected_nodes)
 
     DeepNodeSchema(many=True).load(nodes)
 

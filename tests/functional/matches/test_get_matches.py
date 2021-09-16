@@ -1,5 +1,5 @@
 from src.models.match.match import MatchSchema
-from tests.functional.common import upload
+from tests.functional.common import upload, ordered
 
 
 def test_get_matches(client):
@@ -21,7 +21,7 @@ def test_get_matches(client):
 
     matches = response.get_json()
 
-    assert matches == expected_matches
+    assert ordered(matches) == ordered(expected_matches)
 
     MatchSchema(many=True).load(matches)
 
