@@ -31,12 +31,12 @@ def test_delete_node(client):
 
     get_response_json = get_response.get_json()
 
-    assert get_response_json == expected_delete_response_json
+    assert get_response_json == expected_get_response_json
 
     DeepNodeSchema(many=True).load(get_response_json)
 
 
-expected_delete_response_json = [
+expected_get_response_json = [
     {
         'id': 3,
         'parentId': None,
