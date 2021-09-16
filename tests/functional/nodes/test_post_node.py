@@ -11,7 +11,7 @@ def test_post_node(client):
     AND     posting a child node
     THEN    those nodes should be added
     """
-    
+
     upload(client)
 
     #

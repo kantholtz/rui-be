@@ -8,7 +8,7 @@ def test_patch_node(client):
     GIVEN   a server with demo data
     WHEN    patching a root node
     AND     patching a child node
-    THEN    those nodes should be deleted
+    THEN    those nodes should be patched
     """
 
     upload(client)
@@ -18,26 +18,26 @@ def test_patch_node(client):
     #
 
     root_node_patch = NodePatch(parent_id=0)
-    root_node_patch_json = NodePatchSchema().dump(root_node_patch)
+    root_node_patch = NodePatchSchema().dump(root_node_patch)
 
-    assert root_node_patch_json == expected_root_node_patch_json
+    assert root_node_patch == expected_root_node_patch
 
-    root_patch_response = client.patch('http://localhost:5000/api/1.6.0/nodes/3', json=root_node_patch_json)
+    patch_root_node_response = client.patch('http://localhost:5000/api/1.6.0/nodes/3', json=root_node_patch)
 
-    assert root_patch_response.status_code == 200
+    assert patch_root_node_response.status_code == 200
 
     #
     # PATCH /nodes/4
     #
 
     child_node_patch = NodePatch(parent_id=None)
-    child_node_patch_json = NodePatchSchema().dump(child_node_patch)
+    child_node_patch = NodePatchSchema().dump(child_node_patch)
 
-    assert child_node_patch_json == expected_child_node_patch_json
+    assert child_node_patch == expected_child_node_patch
 
-    child_patch_response = client.patch('http://localhost:5000/api/1.6.0/nodes/4', json=child_node_patch_json)
+    patch_child_node_response = client.patch('http://localhost:5000/api/1.6.0/nodes/4', json=child_node_patch)
 
-    assert child_patch_response.status_code == 200
+    assert patch_child_node_response.status_code == 200
 
     #
     # GET /nodes
@@ -52,11 +52,11 @@ def test_patch_node(client):
     DeepNodeSchema(many=True).load(nodes)
 
 
-expected_root_node_patch_json = {
+expected_root_node_patch = {
     'parentId': 0
 }
 
-expected_child_node_patch_json = {
+expected_child_node_patch = {
     'parentId': None
 }
 
