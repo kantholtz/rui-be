@@ -15,9 +15,9 @@ def test_patch_node(client):
 
     assert node_patch_json == expected_node_patch_json
 
-    response = client.patch('http://localhost:5000/api/1.6.0/nodes/3', json=node_patch_json)
+    patch_response = client.patch('http://localhost:5000/api/1.6.0/nodes/3', json=node_patch_json)
 
-    assert response.status_code == 200
+    assert patch_response.status_code == 200
 
     #
     # GET /nodes
