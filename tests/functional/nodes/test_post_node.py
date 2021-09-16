@@ -23,9 +23,9 @@ def test_post_node(client):
 
     assert post_node_json == expected_post_node_json
 
-    response = client.post('http://localhost:5000/api/1.6.0/nodes', json=post_node_json)
+    post_response = client.post('http://localhost:5000/api/1.6.0/nodes', json=post_node_json)
 
-    assert response.status_code == 201
+    assert post_response.status_code == 201
 
     #
     # GET /nodes
