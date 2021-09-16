@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from marshmallow import fields, post_load
 
@@ -7,7 +8,7 @@ from src.models.camel_case_schema import CamelCaseSchema
 
 @dataclass
 class NodePatch:
-    parent_id: int
+    parent_id: Optional[int]
 
 
 class NodePatchSchema(CamelCaseSchema):

@@ -4,20 +4,40 @@ from tests.functional.common import upload
 
 
 def test_patch_node(client):
+    """
+    GIVEN   a server with the demo data
+    WHEN    patching a root node
+    AND     patching a child node
+    THEN    those nodes should be deleted
+    """
+
     upload(client)
 
     #
     # PATCH /nodes/3
     #
 
-    node_patch = NodePatch(parent_id=0)
-    node_patch_json = NodePatchSchema().dump(node_patch)
+    root_node_patch = NodePatch(parent_id=0)
+    root_node_patch_json = NodePatchSchema().dump(root_node_patch)
 
-    assert node_patch_json == expected_node_patch_json
+    assert root_node_patch_json == expected_root_node_patch_json
 
-    patch_response = client.patch('http://localhost:5000/api/1.6.0/nodes/3', json=node_patch_json)
+    root_patch_response = client.patch('http://localhost:5000/api/1.6.0/nodes/3', json=root_node_patch_json)
 
-    assert patch_response.status_code == 200
+    assert root_patch_response.status_code == 200
+
+    #
+    # PATCH /nodes/4
+    #
+
+    child_node_patch = NodePatch(parent_id=None)
+    child_node_patch_json = NodePatchSchema().dump(child_node_patch)
+
+    assert child_node_patch_json == expected_child_node_patch_json
+
+    child_patch_response = client.patch('http://localhost:5000/api/1.6.0/nodes/4', json=child_node_patch_json)
+
+    assert child_patch_response.status_code == 200
 
     #
     # GET /nodes
@@ -32,8 +52,12 @@ def test_patch_node(client):
     DeepNodeSchema(many=True).load(get_response_json)
 
 
-expected_node_patch_json = {
+expected_root_node_patch_json = {
     'parentId': 0
+}
+
+expected_child_node_patch_json = {
+    'parentId': None
 }
 
 expected_get_response_json = [
@@ -88,43 +112,6 @@ expected_get_response_json = [
                 ],
                 'children': [
                     {
-                        'id': 4,
-                        'parentId': 3,
-                        'entities': [
-                            {
-                                'id': 4,
-                                'nodeId': 4,
-                                'name': 'Ba-1',
-                                'matchesCount': 1
-                            },
-                            {
-                                'id': 5,
-                                'nodeId': 4,
-                                'name': 'Ba-2',
-                                'matchesCount': 1
-                            },
-                            {
-                                'id': 6,
-                                'nodeId': 4,
-                                'name': 'Ba-3',
-                                'matchesCount': 0
-                            },
-                            {
-                                'id': 7,
-                                'nodeId': 4,
-                                'name': 'Ba-4',
-                                'matchesCount': 1
-                            },
-                            {
-                                'id': 8,
-                                'nodeId': 4,
-                                'name': 'Ba-5',
-                                'matchesCount': 1
-                            }
-                        ],
-                        'children': []
-                    },
-                    {
                         'id': 5,
                         'parentId': 3,
                         'entities': [
@@ -146,6 +133,43 @@ expected_get_response_json = [
                 ]
             }
         ]
+    },
+    {
+        'id': 4,
+        'parentId': None,
+        'entities': [
+            {
+                'id': 4,
+                'nodeId': 4,
+                'name': 'Ba-1',
+                'matchesCount': 1
+            },
+            {
+                'id': 5,
+                'nodeId': 4,
+                'name': 'Ba-2',
+                'matchesCount': 1
+            },
+            {
+                'id': 6,
+                'nodeId': 4,
+                'name': 'Ba-3',
+                'matchesCount': 0
+            },
+            {
+                'id': 7,
+                'nodeId': 4,
+                'name': 'Ba-4',
+                'matchesCount': 1
+            },
+            {
+                'id': 8,
+                'nodeId': 4,
+                'name': 'Ba-5',
+                'matchesCount': 1
+            }
+        ],
+        'children': []
     },
     {
         'id': 6,
