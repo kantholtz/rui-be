@@ -1,11 +1,11 @@
 from flask import Flask
 from flask_cors import CORS
 
-from src.routes.entities import entities
-from src.routes.matches import matches
-from src.routes.nodes import nodes
-from src.routes.predictions import predictions
-from src.routes.upload import upload
+from src.rui_be.routes.entities import entities
+from src.rui_be.routes.matches import matches
+from src.rui_be.routes.nodes import nodes
+from src.rui_be.routes.predictions import predictions
+from src.rui_be.routes.upload import upload
 
 
 def create_app(config=None) -> Flask:

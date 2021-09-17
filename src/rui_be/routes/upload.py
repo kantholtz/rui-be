@@ -9,7 +9,7 @@ from flask import Blueprint, request
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from src import state
+from src.rui_be import state
 
 upload = Blueprint('upload', __name__)
 

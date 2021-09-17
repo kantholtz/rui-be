@@ -3,8 +3,8 @@ from typing import Optional
 
 from marshmallow import fields, post_load
 
-from src.models.camel_case_schema import CamelCaseSchema
-from src.models.entity.entity import EntitySchema, Entity
+from src.rui_be.models.camel_case_schema import CamelCaseSchema
+from src.rui_be.models.entity.entity import EntitySchema, Entity
 
 
 @dataclass

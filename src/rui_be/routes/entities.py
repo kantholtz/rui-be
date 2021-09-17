@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
-from src import state
-from src.models.entity.post_entity import PostEntity, PostEntitySchema
+from src.rui_be import state
+from src.rui_be.models.entity.post_entity import PostEntity, PostEntitySchema
 
 entities = Blueprint('entities', __name__)
 

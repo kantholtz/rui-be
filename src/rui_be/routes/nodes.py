@@ -1,10 +1,10 @@
 from flask import Blueprint, Response, request, jsonify
 
-from src import state
-from src.models.entity.entity import Entity
-from src.models.node.deep_node import DeepNode, DeepNodeSchema
-from src.models.node.node_patch import NodePatch, NodePatchSchema
-from src.models.node.post_node import PostNode, PostNodeSchema
+from src.rui_be import state
+from src.rui_be.models.entity.entity import Entity
+from src.rui_be.models.node.deep_node import DeepNode, DeepNodeSchema
+from src.rui_be.models.node.node_patch import NodePatch, NodePatchSchema
+from src.rui_be.models.node.post_node import PostNode, PostNodeSchema
 
 nodes = Blueprint('nodes', __name__)
 
@@ -41,7 +41,7 @@ def post_node() -> tuple[str, int]:
     new_node: PostNode = PostNodeSchema().load(request_data)
 
     state.graph.add_node(names=[ent.name for ent in new_node.entities],
-                   parent=new_node.parent_id)
+                         parent=new_node.parent_id)
 
     return '', 201
 

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 from marshmallow import fields, post_load
 
-from src.models.camel_case_schema import CamelCaseSchema
-from src.models.node.node import Node, NodeSchema
+from src.rui_be.models.camel_case_schema import CamelCaseSchema
+from src.rui_be.models.node.node import Node, NodeSchema
 
 
 @dataclass
