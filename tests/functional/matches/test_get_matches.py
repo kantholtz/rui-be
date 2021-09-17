@@ -1,4 +1,4 @@
-from src.models.match.match import MatchSchema
+from src.rui_be.models.match.match import MatchSchema
 from tests.functional.common import upload, ordered
 
 

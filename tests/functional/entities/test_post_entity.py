@@ -1,5 +1,5 @@
-from src.models.entity.post_entity import PostEntity, PostEntitySchema
-from src.models.node.deep_node import DeepNodeSchema
+from src.rui_be.models.entity.post_entity import PostEntity, PostEntitySchema
+from src.rui_be.models.node.deep_node import DeepNodeSchema
 from tests.functional.common import upload, ordered
 
 

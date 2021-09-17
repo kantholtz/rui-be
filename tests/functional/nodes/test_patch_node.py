@@ -1,5 +1,5 @@
-from src.models.node.deep_node import DeepNodeSchema
-from src.models.node.node_patch import NodePatch, NodePatchSchema
+from src.rui_be.models.node.deep_node import DeepNodeSchema
+from src.rui_be.models.node.node_patch import NodePatch, NodePatchSchema
 from tests.functional.common import upload, ordered
 
 

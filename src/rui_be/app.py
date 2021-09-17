@@ -8,6 +8,11 @@ from src.rui_be.routes.predictions import predictions
 from src.rui_be.routes.upload import upload
 
 
+def main():
+    app = create_app()
+    app.run()
+
+
 def create_app(config=None) -> Flask:
     app = Flask(__name__)
 

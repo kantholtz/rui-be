@@ -1,6 +1,6 @@
 import pytest
 
-from src.app import create_app
+from src.rui_be.app import create_app
 
 
 @pytest.fixture
