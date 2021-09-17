@@ -1,4 +1,4 @@
-from src.rui_be.models.node.deep_node import DeepNodeSchema
+from rui_be.models.node.deep_node import DeepNodeSchema
 from tests.functional.common import upload, ordered
 
 

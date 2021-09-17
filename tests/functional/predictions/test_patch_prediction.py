@@ -1,5 +1,5 @@
-from src.rui_be.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
-from src.rui_be.models.prediction.prediction_response import PredictionResponseSchema
+from rui_be.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
+from rui_be.models.prediction.prediction_response import PredictionResponseSchema
 from tests.functional.common import upload, ordered
 
 

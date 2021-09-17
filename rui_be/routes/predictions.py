@@ -3,13 +3,13 @@ from itertools import islice
 from draug.homag.model import Prediction, Relation
 from flask import Blueprint, Response, request, jsonify
 
-from src.rui_be import state
-from src.rui_be.models.entity.entity import Entity
-from src.rui_be.models.node.node import Node
-from src.rui_be.models.prediction.candidate_prediction import CandidatePrediction
-from src.rui_be.models.prediction.candidate_with_predictions import CandidateWithPredictions
-from src.rui_be.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
-from src.rui_be.models.prediction.prediction_response import PredictionResponse, PredictionResponseSchema
+from rui_be import state
+from rui_be.models.entity.entity import Entity
+from rui_be.models.node.node import Node
+from rui_be.models.prediction.candidate_prediction import CandidatePrediction
+from rui_be.models.prediction.candidate_with_predictions import CandidateWithPredictions
+from rui_be.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
+from rui_be.models.prediction.prediction_response import PredictionResponse, PredictionResponseSchema
 
 predictions = Blueprint('predictions', __name__)
 

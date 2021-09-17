@@ -1,6 +1,6 @@
-from src.rui_be.models.entity.post_node_entity import PostNodeEntity
-from src.rui_be.models.node.deep_node import DeepNodeSchema
-from src.rui_be.models.node.post_node import PostNode, PostNodeSchema
+from rui_be.models.entity.post_node_entity import PostNodeEntity
+from rui_be.models.node.deep_node import DeepNodeSchema
+from rui_be.models.node.post_node import PostNode, PostNodeSchema
 from tests.functional.common import upload, ordered
 
 

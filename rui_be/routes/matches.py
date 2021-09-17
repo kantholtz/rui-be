@@ -1,7 +1,7 @@
 from flask import Blueprint, Response, request, jsonify
 
-from src.rui_be import state
-from src.rui_be.models.match.match import Match, MatchSchema
+from rui_be import state
+from rui_be.models.match.match import Match, MatchSchema
 
 matches = Blueprint('matches', __name__)
 

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 from marshmallow import fields, post_load
 
-from src.rui_be.models.camel_case_schema import CamelCaseSchema
-from src.rui_be.models.prediction.candidate_with_predictions import CandidateWithPredictionsSchema, CandidateWithPredictions
+from rui_be.models.camel_case_schema import CamelCaseSchema
+from rui_be.models.prediction.candidate_with_predictions import CandidateWithPredictionsSchema, CandidateWithPredictions
 
 
 @dataclass

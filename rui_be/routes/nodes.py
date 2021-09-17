@@ -1,10 +1,10 @@
 from flask import Blueprint, Response, request, jsonify
 
-from src.rui_be import state
-from src.rui_be.models.entity.entity import Entity
-from src.rui_be.models.node.deep_node import DeepNode, DeepNodeSchema
-from src.rui_be.models.node.node_patch import NodePatch, NodePatchSchema
-from src.rui_be.models.node.post_node import PostNode, PostNodeSchema
+from rui_be import state
+from rui_be.models.entity.entity import Entity
+from rui_be.models.node.deep_node import DeepNode, DeepNodeSchema
+from rui_be.models.node.node_patch import NodePatch, NodePatchSchema
+from rui_be.models.node.post_node import PostNode, PostNodeSchema
 
 nodes = Blueprint('nodes', __name__)
 

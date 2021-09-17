@@ -3,7 +3,7 @@ from typing import Optional
 
 from marshmallow import fields, post_load
 
-from src.rui_be.models.camel_case_schema import CamelCaseSchema
+from rui_be.models.camel_case_schema import CamelCaseSchema
 
 
 @dataclass
