@@ -55,7 +55,12 @@ def patch_node(node_id: int) -> str:
 
     node_patch: NodePatch = NodePatchSchema().load(request_data)
 
-    state.graph.set_parent(node_id, node_patch.parent_id)
+    if node_patch.parent_id is None and \
+            state.graph.get_parent(node_id) is not None:
+        state.graph.del_parent(node_id)
+
+    elif node_patch.parent_id is not None:
+        state.graph.set_parent(node_id, node_patch.parent_id)
 
     return ''
 
