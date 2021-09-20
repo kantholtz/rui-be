@@ -1,3 +1,4 @@
+import draug.homag.graph
 from flask import Blueprint, request
 
 from rui_be import state
@@ -12,7 +13,7 @@ def post_entity() -> tuple[str, int]:
 
     new_entity: PostEntity = PostEntitySchema().load(request_data)
 
-    state.graph.add_name(new_entity.node_id, new_entity.name)
+    state.graph.add_entity(new_entity.node_id, draug.homag.graph.Entity(new_entity.name))
 
     return '', 201
 

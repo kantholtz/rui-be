@@ -62,6 +62,6 @@ def patch_node(node_id: int) -> str:
 
 @nodes.route('/api/1.6.0/nodes/<int:node_id>', methods=['DELETE'])
 def delete_node(node_id: int) -> str:
-    state.graph.delete_node(node_id)
+    state.graph.del_node(node_id)
 
     return ''
