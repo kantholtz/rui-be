@@ -1,3 +1,4 @@
+import draug.homag.graph
 from flask import Blueprint, Response, request, jsonify
 
 from rui_be import state
@@ -11,18 +12,18 @@ nodes = Blueprint('nodes', __name__)
 
 @nodes.route('/api/1.6.0/nodes', methods=['GET'])
 def get_nodes() -> Response:
-    root_node_ids = state.graph.find_root_ents()
+    root_node_ids = state.graph.roots
 
     #
     # Build and return list of recusively populated nodes
     #
 
     def deep_node_from_node_id(node_id: int) -> DeepNode:
-        entity_ids = state.graph.node_eids(node_id)
+        entity_ids = state.graph.get_entities(node_id)
 
         return DeepNode(id=node_id,
                         parent_id=state.graph.get_parent(node_id),
-                        entities=[Entity(entity_id, node_id, state.graph.entity_name(entity_id),
+                        entities=[Entity(entity_id, node_id, state.graph.get_entity(entity_id).name,
                                          len(state.matches_store.by_eid(entity_id)))
                                   for entity_id in entity_ids],
                         children=[deep_node_from_node_id(child)
@@ -40,8 +41,10 @@ def post_node() -> tuple[str, int]:
 
     new_node: PostNode = PostNodeSchema().load(request_data)
 
-    state.graph.add_node(names=[ent.name for ent in new_node.entities],
-                         parent=new_node.parent_id)
+    new_node_id = state.graph.add_node(entities=[draug.homag.graph.Entity(ent.name) for ent in new_node.entities])
+
+    if new_node.parent_id is not None:
+        state.graph.set_parent(new_node_id, new_node.parent_id)
 
     return '', 201
 
