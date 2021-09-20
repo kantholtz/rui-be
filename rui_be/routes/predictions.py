@@ -16,7 +16,6 @@ predictions = Blueprint('predictions', __name__)
 
 @predictions.route('/api/1.6.0/nodes/<int:node_id>/predictions', methods=['GET'])
 def get_predictions(node_id: int) -> Response:
-
     #
     # Parse query params
     #
@@ -69,16 +68,16 @@ def _paginate_dict(dict_: dict, offset: int, limit: int) -> dict:
 def _get_candiate_prediction(prediction: Prediction) -> CandidatePrediction:
     pred_node_id = prediction.predicted_nid
 
-    pred_node_entity_ids = state.graph.node_eids(pred_node_id)
-    pred_node_entities = [Entity(id=pred_entity_id,
-                                 node_id=pred_node_id,
-                                 name=state.graph.entity_name(pred_entity_id),
-                                 matches_count=len(state.matches_store.by_eid(pred_entity_id)))
-                          for pred_entity_id in pred_node_entity_ids]
+    eid_to_draug_entity = state.graph.get_entities(pred_node_id)
+    entities = [Entity(id=entity_id,
+                       node_id=pred_node_id,
+                       name=entity.name,
+                       matches_count=len(state.matches_store.by_eid(entity_id)))
+                for (entity_id, entity) in eid_to_draug_entity.items()]
 
     pred_node = Node(id=pred_node_id,
                      parent_id=state.graph.get_parent(pred_node_id),
-                     entities=pred_node_entities)
+                     entities=entities)
 
     return CandidatePrediction(score=prediction.score_norm, node=pred_node)
 

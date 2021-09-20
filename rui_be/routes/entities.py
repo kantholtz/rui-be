@@ -20,6 +20,6 @@ def post_entity() -> tuple[str, int]:
 
 @entities.route('/api/1.6.0/entities/<int:entity_id>', methods=['DELETE'])
 def delete_entity(entity_id: int) -> str:
-    state.graph.delete_name(entity_id)
+    state.graph.del_entity(entity_id)
 
     return ''
