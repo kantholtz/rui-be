@@ -1,6 +1,7 @@
 from itertools import islice
 
-from draug.homag.model import Prediction, Relation
+from draug.homag.graph import Graph
+from draug.homag.model import Prediction
 from flask import Blueprint, Response, request, jsonify
 
 from rui_be import state
@@ -91,9 +92,9 @@ def _get_candidate_with_predictions(candidate: str,
     for prediction in predictions:
         candidate_prediction = _get_candiate_prediction(prediction)
 
-        if prediction.relation == Relation.PARENT:
+        if prediction.relation == Graph.RELATIONS.parent:
             parent_predictions.append(candidate_prediction)
-        elif prediction.relation == Relation.SYNONYM:
+        elif prediction.relation == Graph.RELATIONS.synonym:
             synonym_predictions.append(candidate_prediction)
 
     return CandidateWithPredictions(candidate, False, parent_predictions, synonym_predictions)
