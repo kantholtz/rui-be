@@ -10,7 +10,7 @@ from rui_be.routes.upload import upload
 
 def main():
     app = create_app()
-    app.run()
+    app.run(host='0.0.0.0')
 
 
 def create_app(config=None) -> Flask:
