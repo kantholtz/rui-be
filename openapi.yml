@@ -2,36 +2,86 @@ openapi: 3.0.0
 
 info:
   description: API for the RUI backend
-  version: 1.5.0
+  version: 1.6.0
   title: RUI
   contact:
     email: tobias.uhmann@gmail.com
 
 tags:
-  - name: upload
-    description: Upload initial taxonomy and matches
-  - name: nodes
   - name: entities
   - name: matches
+  - name: nodes
+  - name: prediction
+  - name: upload
+    description: Upload initial taxonomy and matches
 
 paths:
 
-  /upload:
+  /entities:
 
-    put:
+    post:
       tags:
-        - upload
-      summary: Put taxonomy and matches
-      operationId: putUpload
+        - entities
+      operationId: postEntity
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              $ref: '#/components/schemas/Upload'
+              $ref: '#/components/schemas/PostEntity'
+      responses:
+        '201':
+          description: Posted entity successfully
+
+  /entities/{entityId}:
+
+    delete:
+      tags:
+        - entities
+      summary: Delete entity
+      operationId: deleteEntity
+      parameters:
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
-          description: Put taxonomy and matches successfully
+          description: Deleted entity successfully
+
+  /matches:
+
+    get:
+      tags:
+        - matches
+      summary: Get matches for an entity
+      operationId: getMatches
+      parameters:
+        - in: query
+          name: entity
+          schema:
+            type: integer
+          description: Entity whose matches to get
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: Pagination Offset
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Pagination Limit
+      responses:
+        '200':
+          description: Got matches successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
 
   /nodes:
 
@@ -103,52 +153,19 @@ paths:
         '200':
           description: Deleted node successfully
 
-  /entities:
+  /nodes/{nodeId}/predictions:
 
-    post:
+    get:
       tags:
-        - entities
-      operationId: postEntity
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostEntity'
-      responses:
-        '201':
-          description: Posted entity successfully
-
-  /entities/{entityId}:
-
-    delete:
-      tags:
-        - entities
-      summary: Delete entity
-      operationId: deleteEntity
+        - prediction
+      summary: Get predictions for node
+      operationId: getPredictions
       parameters:
-        - name: entityId
+        - name: nodeId
           in: path
           required: true
           schema:
             type: integer
-      responses:
-        '200':
-          description: Deleted entity successfully
-
-  /matches:
-
-    get:
-      tags:
-        - matches
-      summary: Get matches for an entity
-      operationId: getMatches
-      parameters:
-        - in: query
-          name: entity
-          schema:
-            type: integer
-          description: Entity whose matches to get
         - in: query
           name: offset
           schema:
@@ -161,13 +178,52 @@ paths:
           description: Pagination Limit
       responses:
         '200':
-          description: Got matches successfully
+          description: Got predictions successfully
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Match'
+                  $ref: '#/components/schemas/CandidateWithPredictions'
+
+  /predictions/{candidate}:
+
+    patch:
+      tags:
+        - prediction
+      summary: Dismiss prediction
+      operationId: patchPrediction
+      parameters:
+        - name: candidate
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PredictionPatch'
+      responses:
+        '200':
+          description: Prediction dismissed successfully
+
+  /upload:
+
+    put:
+      tags:
+        - upload
+      summary: Put taxonomy and matches
+      operationId: putUpload
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Upload'
+      responses:
+        '200':
+          description: Put taxonomy and matches successfully
 
 components:
   schemas:
@@ -241,6 +297,19 @@ components:
           items:
             $ref: '#/components/schemas/DeepNode'
 
+    Node:
+      description: Full node
+      type: object
+      properties:
+        id:
+          type: integer
+        parentId:
+          type: integer
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entity'
+
     NodePatch:
       properties:
         parentId:
@@ -256,6 +325,50 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PostEntityNode'
+
+    # Prediction
+
+    CandidatePrediction:
+      description: Prediction for a certain candidate
+      type: object
+      properties:
+        score:
+          type: number
+        node:
+          $ref: '#/components/schemas/Node'
+
+    CandidateWithPredictions:
+      description: Prediction about a node
+      type: object
+      properties:
+        candidate:
+          type: string
+        dismissed:
+          type: boolean
+        parentPredictions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandidatePrediction'
+        synonymPredictions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandidatePrediction'
+
+    PredictionPatch:
+      description: Dismiss a prediction
+      type: object
+      properties:
+        dismissed:
+          type: boolean
+
+    PredictionResponse:
+      description: Paginated predictions about node plus total number of predictions
+      type: object
+      properties:
+        totalPredictions:
+          type: integer
+        predictions:
+          $ref: '#/components/schemas/PredictionResponse'
 
     # Upload
 

@@ -16,12 +16,12 @@
 						{
 							"key": "symptaxUploadZip",
 							"type": "file",
-							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax_upload.v6.zip"
+							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax_upload_v7_random.zip"
 						}
 					]
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.4.0/upload",
+					"raw": "http://localhost:5000/api/1.6.0/upload",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -29,7 +29,7 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.4.0",
+						"1.6.0",
 						"upload"
 					]
 				}
@@ -42,7 +42,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/1.4.0/nodes",
+					"raw": "http://localhost:5000/api/1.6.0/nodes",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -50,7 +50,7 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.4.0",
+						"1.6.0",
 						"nodes"
 					]
 				}
@@ -64,7 +64,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"parentId\": null,\r\n    \"entities\": [\r\n        {\r\n            \"name\": \"NEU 1\"\r\n        },\r\n        {\r\n            \"name\": \"NEU 2\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"parentId\": 0,\r\n    \"entities\": [\r\n        {\r\n            \"name\": \"Ac-1\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -72,7 +72,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.4.0/nodes",
+					"raw": "http://localhost:5000/api/1.6.0/nodes",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -80,7 +80,7 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.4.0",
+						"1.6.0",
 						"nodes"
 					]
 				}
@@ -94,7 +94,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"parentId\": 0\r\n}\r\n",
+					"raw": "{\r\n    \"parentId\": null\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -102,7 +102,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.4.0/nodes/1",
+					"raw": "http://localhost:5000/api/1.6.0/nodes/4",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -110,9 +110,9 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.4.0",
+						"1.6.0",
 						"nodes",
-						"1"
+						"4"
 					]
 				}
 			},
@@ -124,7 +124,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/1.4.0/nodes/1",
+					"raw": "http://localhost:5000/api/1.6.0/nodes/4",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -132,9 +132,9 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.4.0",
+						"1.6.0",
 						"nodes",
-						"1"
+						"4"
 					]
 				}
 			},
@@ -147,7 +147,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"nodeId\": 0,\r\n    \"name\": \"NEW ENT 3\"\r\n}\r\n",
+					"raw": "{\r\n    \"nodeId\": 1,\r\n    \"name\": \"Aa-2\"\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -155,7 +155,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/1.4.0/entities",
+					"raw": "http://localhost:5000/api/1.6.0/entities",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -163,7 +163,7 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.4.0",
+						"1.6.0",
 						"entities"
 					]
 				}
@@ -176,7 +176,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/1.4.0/entities/1",
+					"raw": "http://localhost:5000/api/1.6.0/entities/8",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -184,9 +184,9 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.4.0",
+						"1.6.0",
 						"entities",
-						"1"
+						"8"
 					]
 				}
 			},
@@ -198,7 +198,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/1.4.0/matches?entity=153&offset=10&limit=10",
+					"raw": "http://localhost:5000/api/1.6.0/matches?entity=0",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -206,22 +206,68 @@
 					"port": "5000",
 					"path": [
 						"api",
-						"1.4.0",
+						"1.6.0",
 						"matches"
 					],
 					"query": [
 						{
 							"key": "entity",
-							"value": "153"
-						},
-						{
-							"key": "offset",
-							"value": "10"
-						},
-						{
-							"key": "limit",
-							"value": "10"
+							"value": "0"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/nodes/{nodeId}/predictions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/1.6.0/nodes/0/predictions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"1.6.0",
+						"nodes",
+						"0",
+						"predictions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/predictions/{candidate}",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"dismissed\": true\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/1.6.0/predictions/Erat%20imperdiet%20sed%20euismod%20nisi%20porta%20lorem%20mollis%20.",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"1.6.0",
+						"predictions",
+						"Erat%20imperdiet%20sed%20euismod%20nisi%20porta%20lorem%20mollis%20."
 					]
 				}
 			},

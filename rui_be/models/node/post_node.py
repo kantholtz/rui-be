@@ -1,14 +1,15 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from marshmallow import fields, post_load
 
-from src.models.camel_case_schema import CamelCaseSchema
-from src.models.entity.post_node_entity import PostNodeEntitySchema, PostNodeEntity
+from rui_be.models.camel_case_schema import CamelCaseSchema
+from rui_be.models.entity.post_node_entity import PostNodeEntitySchema, PostNodeEntity
 
 
 @dataclass
 class PostNode:
-    parent_id: int
+    parent_id: Optional[int]
 
     entities: list[PostNodeEntity]
 
