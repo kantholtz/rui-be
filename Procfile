@@ -1,1 +1,1 @@
-web: gunicorn --workers=1 src.app:app
+web: gunicorn --workers=1 rui_be.app:main
