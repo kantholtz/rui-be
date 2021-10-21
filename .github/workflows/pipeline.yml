@@ -8,6 +8,10 @@ jobs:
   deliver_docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Add SSH key for git.ramlimit.de
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
