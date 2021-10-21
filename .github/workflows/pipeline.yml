@@ -23,6 +23,8 @@ jobs:
           username: xvlcw
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - run: ssh-add -L
+
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
