@@ -1,7 +1,4 @@
-name: pipeline
-
-on:
-  push:
+on: [ push ]
 
 jobs:
 
