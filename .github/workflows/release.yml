@@ -1,7 +1,6 @@
-name: pipeline
-
 on:
-  push:
+  release:
+    types: [ published ]
 
 jobs:
 
@@ -34,3 +33,32 @@ jobs:
             xvlcw/rui-be:0
             xvlcw/rui-be:0.9
             xvlcw/rui-be:0.9.0
+
+  test_docker:
+    needs: deliver_docker
+    runs-on: ubuntu-20.04
+    steps:
+
+      - name: Start backend
+        run: docker run --name rui-be --publish "5000:5000" --detach xvlcw/rui-be:0.9.0
+
+      - name: Wait for server
+        uses: cygnetdigital/wait_for_response@v2.0.0
+        with:
+          url: 'http://localhost:5000/'
+
+  test_docker_compose:
+    needs: deliver_docker
+    runs-on: ubuntu-20.04
+    steps:
+
+      - name: Checkout from GitHub
+        uses: actions/checkout@v2
+
+      - name: Start backend
+        run: docker-compose up --detach
+
+      - name: Wait for server
+        uses: cygnetdigital/wait_for_response@v2.0.0
+        with:
+          url: 'http://localhost:5000/'
