@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.0.0-experimental
 
 FROM python:3.9-slim-buster
 

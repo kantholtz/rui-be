@@ -1,0 +1,9 @@
+version: "3.7"
+
+services:
+
+  rui-be:
+    container_name: rui-be
+    build: .
+    ports:
+      - "5000:5000"
