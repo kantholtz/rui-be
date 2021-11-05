@@ -1,6 +1,6 @@
 from rui_be.models.node.deep_node import DeepNodeSchema
 from rui_be.models.node.node_patch import NodePatch, NodePatchSchema
-from tests.functional.common import upload, ordered
+from tests.common import upload, ordered
 
 
 def test_patch_node(client):

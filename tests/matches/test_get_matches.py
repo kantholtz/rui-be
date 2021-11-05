@@ -1,5 +1,5 @@
 from rui_be.models.match.match import MatchSchema
-from tests.functional.common import upload, ordered
+from tests.common import upload, ordered
 
 
 def test_get_matches(client):

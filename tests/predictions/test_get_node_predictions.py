@@ -1,5 +1,5 @@
 from rui_be.models.prediction.prediction_response import PredictionResponseSchema
-from tests.functional.common import upload, ordered
+from tests.common import upload, ordered
 
 
 def test_get_node_predictions(client):

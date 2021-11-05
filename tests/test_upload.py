@@ -1,4 +1,4 @@
-from tests.functional.common import upload
+from tests.common import upload
 
 
 def test_upload(client):
