@@ -37,24 +37,8 @@ def get_predictions(node_id: int) -> Response:
     candidate_with_predictions_list = [_get_candidate_with_predictions(candidate, predictions)
                                        for candidate, predictions in candidate_to_predictions.items()]
 
-    def calc_scores(candidate_with_predictions: CandidateWithPredictions):
-        cwp = candidate_with_predictions
-
-        if len(cwp.synonym_predictions) > 0 and len(cwp.parent_predictions) > 0:
-            return ((cwp.synonym_predictions[0].score_norm + cwp.parent_predictions[0].score_norm) / 2,
-                    (cwp.synonym_predictions[0].score + cwp.parent_predictions[0].score) / 2)
-
-        elif len(cwp.synonym_predictions) > 0:
-            return cwp.synonym_predictions[0].score_norm, cwp.synonym_predictions[0].score
-
-        elif len(cwp.parent_predictions) > 0:
-            return cwp.parent_predictions[0].score_norm, cwp.parent_predictions[0].score
-
-        else:
-            raise AssertionError
-
     # Sort candidates with predictions by score
-    candidate_with_predictions_list.sort(key=lambda cwp: calc_scores(cwp), reverse=True)
+    candidate_with_predictions_list.sort(key=lambda cwp: (cwp.total_score_norm, cwp.total_score), reverse=True)
 
     candidate_to_predictions_page = _paginate(candidate_with_predictions_list, offset, limit)
 
@@ -110,7 +94,25 @@ def _get_candidate_with_predictions(candidate: str,
         elif prediction.relation == Graph.RELATIONS.synonym:
             synonym_predictions.append(candidate_prediction)
 
-    return CandidateWithPredictions(candidate, False, parent_predictions, synonym_predictions)
+    total_score, total_score_norm = _calc_total_scores(synonym_predictions, parent_predictions)
+
+    return CandidateWithPredictions(candidate, False, total_score, total_score_norm, parent_predictions,
+                                    synonym_predictions)
+
+
+def _calc_total_scores(synonym_predictions: list[CandidatePrediction], parent_predictions: list[CandidatePrediction]):
+    if len(synonym_predictions) > 0 and len(parent_predictions) > 0:
+        return ((synonym_predictions[0].score_norm + parent_predictions[0].score_norm) / 2,
+                (synonym_predictions[0].score + parent_predictions[0].score) / 2)
+
+    elif len(synonym_predictions) > 0:
+        return synonym_predictions[0].score_norm, synonym_predictions[0].score
+
+    elif len(parent_predictions) > 0:
+        return parent_predictions[0].score_norm, parent_predictions[0].score
+
+    else:
+        raise AssertionError
 
 
 @predictions.route('/api/1.6.0/predictions/<string:candidate>', methods=['PATCH'])

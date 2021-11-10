@@ -11,6 +11,9 @@ class CandidateWithPredictions:
     candidate: str
     dismissed: bool
 
+    total_score: float
+    total_score_norm: float
+
     parent_predictions: list[CandidatePrediction]
     synonym_predictions: list[CandidatePrediction]
 
@@ -18,6 +21,9 @@ class CandidateWithPredictions:
 class CandidateWithPredictionsSchema(CamelCaseSchema):
     candidate = fields.String(required=True)
     dismissed = fields.Boolean(required=True)
+
+    total_score = fields.Float(required=True)
+    total_score_norm = fields.Float(required=True)
 
     parent_predictions = fields.List(fields.Nested(CandidatePredictionSchema), required=True)
     synonym_predictions = fields.List(fields.Nested(CandidatePredictionSchema), required=True)
