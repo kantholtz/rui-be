@@ -37,23 +37,24 @@ def get_predictions(node_id: int) -> Response:
     candidate_with_predictions_list = [_get_candidate_with_predictions(candidate, predictions)
                                        for candidate, predictions in candidate_to_predictions.items()]
 
-    def calc_score(candidate_with_predictions: CandidateWithPredictions):
+    def calc_scores(candidate_with_predictions: CandidateWithPredictions):
         cwp = candidate_with_predictions
 
         if len(cwp.synonym_predictions) > 0 and len(cwp.parent_predictions) > 0:
-            return (cwp.synonym_predictions[0].score + cwp.parent_predictions[0].score) / 2
+            return ((cwp.synonym_predictions[0].score_norm + cwp.parent_predictions[0].score_norm) / 2,
+                    (cwp.synonym_predictions[0].score + cwp.parent_predictions[0].score) / 2)
 
         elif len(cwp.synonym_predictions) > 0:
-            return cwp.synonym_predictions[0].score
+            return cwp.synonym_predictions[0].score_norm, cwp.synonym_predictions[0].score
 
         elif len(cwp.parent_predictions) > 0:
-            return cwp.parent_predictions[0].score
+            return cwp.parent_predictions[0].score_norm, cwp.parent_predictions[0].score
 
         else:
             raise AssertionError
 
     # Sort candidates with predictions by score
-    candidate_with_predictions_list.sort(key=lambda cwp: calc_score(cwp), reverse=True)
+    candidate_with_predictions_list.sort(key=lambda cwp: calc_scores(cwp), reverse=True)
 
     candidate_to_predictions_page = _paginate(candidate_with_predictions_list, offset, limit)
 
@@ -92,14 +93,14 @@ def _get_candiate_prediction(prediction: Prediction) -> CandidatePrediction:
                      parent_id=state.graph.get_parent(pred_node_id),
                      entities=entities)
 
-    return CandidatePrediction(score=prediction.score_norm, node=pred_node)
+    return CandidatePrediction(score=prediction.score, score_norm=prediction.score_norm, node=pred_node)
 
 
 def _get_candidate_with_predictions(candidate: str,
                                     predictions: list[Prediction]
                                     ) -> CandidateWithPredictions:
-    parent_predictions = []
-    synonym_predictions = []
+    parent_predictions: list[CandidatePrediction] = []
+    synonym_predictions: list[CandidatePrediction] = []
 
     for prediction in predictions:
         candidate_prediction = _get_candiate_prediction(prediction)
