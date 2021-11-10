@@ -1,5 +1,3 @@
-from itertools import islice
-
 from draug.homag.graph import Graph
 from draug.homag.model import Prediction
 from flask import Blueprint, Response, request, jsonify
@@ -36,34 +34,48 @@ def get_predictions(node_id: int) -> Response:
     candidate_to_predictions: dict[str, list[Prediction]] = \
         state.predictions_store.by_nid(node_id, filter_out_dismissed=True)
 
-    candidate_to_predictions_length = len(candidate_to_predictions)
+    candidate_with_predictions_list = [_get_candidate_with_predictions(candidate, predictions)
+                                       for candidate, predictions in candidate_to_predictions.items()]
 
-    candidate_to_predictions = _paginate_dict(candidate_to_predictions, offset, limit)
+    def calc_score(candidate_with_predictions: CandidateWithPredictions):
+        cwp = candidate_with_predictions
+
+        if len(cwp.synonym_predictions) > 0 and len(cwp.parent_predictions) > 0:
+            return (cwp.synonym_predictions[0].score + cwp.parent_predictions[0].score) / 2
+
+        elif len(cwp.synonym_predictions) > 0:
+            return cwp.synonym_predictions[0].score
+
+        elif len(cwp.parent_predictions) > 0:
+            return cwp.parent_predictions[0].score
+
+        else:
+            raise AssertionError
+
+    # Sort candidates with predictions by score
+    candidate_with_predictions_list.sort(key=lambda cwp: calc_score(cwp), reverse=True)
+
+    candidate_to_predictions_page = _paginate(candidate_with_predictions_list, offset, limit)
 
     #
     # Add information about predicted node and build response
     #
 
-    candidate_with_predictions_list = [_get_candidate_with_predictions(candidate, predictions)
-                                       for candidate, predictions in candidate_to_predictions.items()]
-
-    prediction_response = PredictionResponse(total_predictions=candidate_to_predictions_length,
-                                             predictions=candidate_with_predictions_list)
+    prediction_response = PredictionResponse(total_predictions=len(candidate_with_predictions_list),
+                                             predictions=candidate_to_predictions_page)
 
     return jsonify(PredictionResponseSchema().dump(prediction_response))
 
 
-def _paginate_dict(dict_: dict, offset: int, limit: int) -> dict:
-    items = dict_.items()
-
+def _paginate(list_: list, offset: int = None, limit: int = None) -> list:
     if offset and limit:
-        items = islice(items, offset, offset + limit)
+        return list_[offset: offset + limit]
     elif offset:
-        items = islice(items, offset, None)
+        return list_[offset: None]
     elif limit:
-        items = islice(items, 0, limit)
-
-    return {key: value for key, value in items}
+        return list_[0: limit]
+    else:
+        return list_
 
 
 def _get_candiate_prediction(prediction: Prediction) -> CandidatePrediction:
