@@ -1,32 +1,51 @@
+from rui_be.models.entity.post_entity import PostEntity, PostEntitySchema
 from rui_be.models.node.deep_node import DeepNodeSchema
-from tests.functional.common import upload, ordered
+from tests.common import upload, ordered
 
 
-def test_delete_entity(client):
+def test_post_entity(client):
     """
     GIVEN   a server with demo data
-    WHEN    deleting a node's first entity
-    AND     deleting a node's last entity
-    THEN    those entities should be deleted
+    WHEN    posting an entity for a root node
+    AND     posting an entity for a child node
+    THEN    those entities should be added
     """
 
     upload(client)
 
     #
-    # DELETE /entities/4
+    # POST /entities
     #
 
-    delete_entity_4_response = client.delete('http://localhost:5000/api/1.6.0/entities/4')
+    post_root_entity = PostEntity(
+        node_id=0,
+        name='A-2'
+    )
 
-    assert delete_entity_4_response.status_code == 200
+    post_root_entity_json = PostEntitySchema().dump(post_root_entity)
+
+    assert post_root_entity_json == expected_post_root_entity_json
+
+    post_root_entity_response = client.post('http://localhost:5000/api/1.6.0/entities', json=post_root_entity_json)
+
+    assert post_root_entity_response.status_code == 201
 
     #
-    # DELETE /entities/8
+    # POST /entities
     #
 
-    delete_entity_8_response = client.delete('http://localhost:5000/api/1.6.0/entities/8')
+    post_child_entity = PostEntity(
+        node_id=1,
+        name='Aa-2'
+    )
 
-    assert delete_entity_8_response.status_code == 200
+    post_child_entity_json = PostEntitySchema().dump(post_child_entity)
+
+    assert post_child_entity_json == expected_post_child_entity_json
+
+    post_child_entity_response = client.post('http://localhost:5000/api/1.6.0/entities', json=post_child_entity_json)
+
+    assert post_child_entity_response.status_code == 201
 
     #
     # GET /nodes
@@ -41,6 +60,16 @@ def test_delete_entity(client):
     DeepNodeSchema(many=True).load(nodes)
 
 
+expected_post_root_entity_json = {
+    'nodeId': 0,
+    'name': 'A-2'
+}
+
+expected_post_child_entity_json = {
+    'nodeId': 1,
+    'name': 'Aa-2'
+}
+
 expected_nodes = [
     {
         'id': 0,
@@ -51,6 +80,12 @@ expected_nodes = [
                 'nodeId': 0,
                 'name': 'A-1',
                 'matchesCount': 2
+            },
+            {
+                'id': 12,
+                'nodeId': 0,
+                'name': 'A-2',
+                'matchesCount': 0
             }
         ],
         'children': [
@@ -63,6 +98,12 @@ expected_nodes = [
                         'nodeId': 1,
                         'name': 'Aa-1',
                         'matchesCount': 2
+                    },
+                    {
+                        'id': 13,
+                        'nodeId': 1,
+                        'name': 'Aa-2',
+                        'matchesCount': 0
                     }
                 ],
                 'children': []
@@ -99,6 +140,12 @@ expected_nodes = [
                 'parentId': 3,
                 'entities': [
                     {
+                        'id': 4,
+                        'nodeId': 4,
+                        'name': 'Ba-1',
+                        'matchesCount': 1
+                    },
+                    {
                         'id': 5,
                         'nodeId': 4,
                         'name': 'Ba-2',
@@ -114,6 +161,12 @@ expected_nodes = [
                         'id': 7,
                         'nodeId': 4,
                         'name': 'Ba-4',
+                        'matchesCount': 1
+                    },
+                    {
+                        'id': 8,
+                        'nodeId': 4,
+                        'name': 'Ba-5',
                         'matchesCount': 1
                     }
                 ],

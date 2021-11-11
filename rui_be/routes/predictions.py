@@ -1,5 +1,3 @@
-from itertools import islice
-
 from draug.homag.graph import Graph
 from draug.homag.model import Prediction
 from flask import Blueprint, Response, request, jsonify
@@ -36,34 +34,33 @@ def get_predictions(node_id: int) -> Response:
     candidate_to_predictions: dict[str, list[Prediction]] = \
         state.predictions_store.by_nid(node_id, filter_out_dismissed=True)
 
-    candidate_to_predictions_length = len(candidate_to_predictions)
+    candidate_with_predictions_list = [_get_candidate_with_predictions(candidate, predictions)
+                                       for candidate, predictions in candidate_to_predictions.items()]
 
-    candidate_to_predictions = _paginate_dict(candidate_to_predictions, offset, limit)
+    # Sort candidates with predictions by score
+    candidate_with_predictions_list.sort(key=lambda cwp: (cwp.total_score_norm, cwp.total_score), reverse=True)
+
+    candidate_to_predictions_page = _paginate(candidate_with_predictions_list, offset, limit)
 
     #
     # Add information about predicted node and build response
     #
 
-    candidate_with_predictions_list = [_get_candidate_with_predictions(candidate, predictions)
-                                       for candidate, predictions in candidate_to_predictions.items()]
-
-    prediction_response = PredictionResponse(total_predictions=candidate_to_predictions_length,
-                                             predictions=candidate_with_predictions_list)
+    prediction_response = PredictionResponse(total_predictions=len(candidate_with_predictions_list),
+                                             predictions=candidate_to_predictions_page)
 
     return jsonify(PredictionResponseSchema().dump(prediction_response))
 
 
-def _paginate_dict(dict_: dict, offset: int, limit: int) -> dict:
-    items = dict_.items()
-
+def _paginate(list_: list, offset: int = None, limit: int = None) -> list:
     if offset and limit:
-        items = islice(items, offset, offset + limit)
+        return list_[offset: offset + limit]
     elif offset:
-        items = islice(items, offset, None)
+        return list_[offset: None]
     elif limit:
-        items = islice(items, 0, limit)
-
-    return {key: value for key, value in items}
+        return list_[0: limit]
+    else:
+        return list_
 
 
 def _get_candiate_prediction(prediction: Prediction) -> CandidatePrediction:
@@ -80,14 +77,14 @@ def _get_candiate_prediction(prediction: Prediction) -> CandidatePrediction:
                      parent_id=state.graph.get_parent(pred_node_id),
                      entities=entities)
 
-    return CandidatePrediction(score=prediction.score_norm, node=pred_node)
+    return CandidatePrediction(score=prediction.score, score_norm=prediction.score_norm, node=pred_node)
 
 
 def _get_candidate_with_predictions(candidate: str,
                                     predictions: list[Prediction]
                                     ) -> CandidateWithPredictions:
-    parent_predictions = []
-    synonym_predictions = []
+    parent_predictions: list[CandidatePrediction] = []
+    synonym_predictions: list[CandidatePrediction] = []
 
     for prediction in predictions:
         candidate_prediction = _get_candiate_prediction(prediction)
@@ -97,7 +94,25 @@ def _get_candidate_with_predictions(candidate: str,
         elif prediction.relation == Graph.RELATIONS.synonym:
             synonym_predictions.append(candidate_prediction)
 
-    return CandidateWithPredictions(candidate, False, parent_predictions, synonym_predictions)
+    total_score, total_score_norm = _calc_total_scores(synonym_predictions, parent_predictions)
+
+    return CandidateWithPredictions(candidate, False, total_score, total_score_norm, parent_predictions,
+                                    synonym_predictions)
+
+
+def _calc_total_scores(synonym_predictions: list[CandidatePrediction], parent_predictions: list[CandidatePrediction]):
+    if len(synonym_predictions) > 0 and len(parent_predictions) > 0:
+        return ((synonym_predictions[0].score_norm + parent_predictions[0].score_norm) / 2,
+                (synonym_predictions[0].score + parent_predictions[0].score) / 2)
+
+    elif len(synonym_predictions) > 0:
+        return synonym_predictions[0].score_norm, synonym_predictions[0].score
+
+    elif len(parent_predictions) > 0:
+        return parent_predictions[0].score_norm, parent_predictions[0].score
+
+    else:
+        raise AssertionError
 
 
 @predictions.route('/api/1.6.0/predictions/<string:candidate>', methods=['PATCH'])

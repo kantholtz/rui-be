@@ -9,11 +9,13 @@ from rui_be.models.node.node import Node, NodeSchema
 @dataclass
 class CandidatePrediction:
     score: float
+    score_norm: float
     node: Node
 
 
 class CandidatePredictionSchema(CamelCaseSchema):
     score = fields.Float(required=True)
+    score_norm = fields.Float(require=True)
     node = fields.Nested(NodeSchema, required=True)
 
     @post_load
