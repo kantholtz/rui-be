@@ -1,4 +1,5 @@
 from rui_be.models.entity.entity import Entity
+from rui_be.models.match.match import Match
 from rui_be.models.node.deep_node import DeepNode
 
 ### Node A
@@ -40,3 +41,18 @@ node_c = DeepNode(id=6, parent_id=None, entities=[entity_c1], children=[])
 
 next_entity_id = 12
 next_node_id = 7
+
+### Matches
+
+match_a11 = Match(entity_id=entity_a1.id,
+                  ticket=1000,
+                  context='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt '
+                          'ut labore et dolore magna aliqua .',
+                  mention='dolor',
+                  mention_indexes=[2, 3])
+
+match_a12 = Match(entity_id=entity_a1.id,
+                  ticket=1011,
+                  context='Viverra tellus in hac habitasse platea dictumst .',
+                  mention='habitasse platea',
+                  mention_indexes=[4, 6])

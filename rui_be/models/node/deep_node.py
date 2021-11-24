@@ -7,7 +7,7 @@ from rui_be.models.camel_case_schema import CamelCaseSchema
 from rui_be.models.entity.entity import EntitySchema, Entity
 
 
-@dataclass(order=True)  # order=True to faciliate comparing DeepNode lists in test's diff view
+@dataclass(order=True)  # order=True to faciliate comparing lists in test's diff view
 class DeepNode:
     id: int
 

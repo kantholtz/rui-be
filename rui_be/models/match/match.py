@@ -5,7 +5,7 @@ from marshmallow import fields, post_load
 from rui_be.models.camel_case_schema import CamelCaseSchema
 
 
-@dataclass
+@dataclass(order=True)  # order=True to faciliate comparing lists in test's diff view
 class Match:
     entity_id: int
 
