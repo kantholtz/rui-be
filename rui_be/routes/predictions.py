@@ -94,10 +94,14 @@ def _get_candidate_with_predictions(candidate: str,
         elif prediction.relation == Graph.RELATIONS.synonym:
             synonym_predictions.append(candidate_prediction)
 
-    total_score, total_score_norm = _calc_total_scores(synonym_predictions, parent_predictions)
+    total_score_norm, total_score = _calc_total_scores(synonym_predictions, parent_predictions)
 
-    return CandidateWithPredictions(candidate, False, total_score, total_score_norm, parent_predictions,
-                                    synonym_predictions)
+    return CandidateWithPredictions(candidate=candidate,
+                                    dismissed=False,
+                                    total_score=total_score,
+                                    total_score_norm=total_score_norm,
+                                    parent_predictions=parent_predictions,
+                                    synonym_predictions=synonym_predictions)
 
 
 def _calc_total_scores(synonym_predictions: list[CandidatePrediction], parent_predictions: list[CandidatePrediction]):
