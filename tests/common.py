@@ -10,7 +10,9 @@ def upload(client):
 
 
 def ordered(obj):
-    # https://stackoverflow.com/questions/25851183/how-to-compare-two-json-objects-with-the-same-elements-in-a-different-order-equa
+    """ Recursively compare dicts ignoring order """
+
+    ### See https://stackoverflow.com/questions/25851183/how-to-compare-two-json-objects-with-the-same-elements-in-a-different-order-equa
 
     if isinstance(obj, dict):
         return sorted((k, ordered(v)) for k, v in obj.items())
