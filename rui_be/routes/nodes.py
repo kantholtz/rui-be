@@ -14,9 +14,7 @@ nodes = Blueprint('nodes', __name__)
 def get_nodes() -> Response:
     root_node_ids = state.graph.roots
 
-    #
-    # Build and return list of recusively populated nodes
-    #
+    ### Build and return list of recusively populated nodes
 
     def deep_node_from_node_id(node_id: int) -> DeepNode:
         entity_ids = state.graph.get_entities(node_id)

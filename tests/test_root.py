@@ -1,11 +1,10 @@
 def test_root(client):
-    """
-    GIVEN   a Flask application
-    WHEN    requesting GET /
-    THEN    the response should contain "Server is up"
-    """
+    ### WHEN    getting /
 
     response = client.get('/')
+
+    ### THEN    the backend should respond with an HTTP 200
+    ### AND     the response should state "Server is up"
 
     assert response.status_code == 200
     assert b"Server is up" in response.data

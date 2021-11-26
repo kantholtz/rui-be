@@ -15,9 +15,7 @@ predictions = Blueprint('predictions', __name__)
 
 @predictions.route('/api/1.6.0/nodes/<int:node_id>/predictions', methods=['GET'])
 def get_predictions(node_id: int) -> Response:
-    #
-    # Parse query params
-    #
+    ### Parse query params
 
     offset = request.args.get('offset')
     if offset:
@@ -27,9 +25,7 @@ def get_predictions(node_id: int) -> Response:
     if limit:
         limit = int(limit)
 
-    #
-    # Get predictions from draug and apply pagination
-    #
+    ### Get predictions from draug and apply pagination
 
     candidate_to_predictions: dict[str, list[Prediction]] = \
         state.predictions_store.by_nid(node_id, filter_out_dismissed=True)
@@ -42,9 +38,7 @@ def get_predictions(node_id: int) -> Response:
 
     candidate_to_predictions_page = _paginate(predictions, offset, limit)
 
-    #
-    # Add information about predicted node and build response
-    #
+    ### Add information about predicted node and build response
 
     predictions_page = PredictionsPage(total_predictions=len(predictions),
                                        predictions=candidate_to_predictions_page)
