@@ -1,12 +1,12 @@
+import draug.homag.model
 from draug.homag.graph import Graph
-from draug.homag.model import Prediction
 from flask import Blueprint, Response, request, jsonify
 
 from rui_be import state
 from rui_be.models.entity.entity import Entity
 from rui_be.models.node.node import Node
+from rui_be.models.prediction.prediction import Prediction
 from rui_be.models.prediction.prediction_item import PredictionItem
-from rui_be.models.prediction.candidate_with_predictions import CandidateWithPredictions
 from rui_be.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
 from rui_be.models.prediction.predictions_page import PredictionsPage, PredictionsPageSchema
 
@@ -34,19 +34,19 @@ def get_predictions(node_id: int) -> Response:
     candidate_to_predictions: dict[str, list[Prediction]] = \
         state.predictions_store.by_nid(node_id, filter_out_dismissed=True)
 
-    candidate_with_predictions_list = [_get_candidate_with_predictions(candidate, predictions)
-                                       for candidate, predictions in candidate_to_predictions.items()]
+    predictions = [_build_prediction(candidate, predictions)
+                   for candidate, predictions in candidate_to_predictions.items()]
 
     # Sort candidates with predictions by score
-    candidate_with_predictions_list.sort(key=lambda cwp: (cwp.total_score_norm, cwp.total_score), reverse=True)
+    predictions.sort(key=lambda cwp: (cwp.total_score_norm, cwp.total_score), reverse=True)
 
-    candidate_to_predictions_page = _paginate(candidate_with_predictions_list, offset, limit)
+    candidate_to_predictions_page = _paginate(predictions, offset, limit)
 
     #
     # Add information about predicted node and build response
     #
 
-    predictions_page = PredictionsPage(total_predictions=len(candidate_with_predictions_list),
+    predictions_page = PredictionsPage(total_predictions=len(predictions),
                                        predictions=candidate_to_predictions_page)
 
     return jsonify(PredictionsPageSchema().dump(predictions_page))
@@ -63,7 +63,7 @@ def _paginate(list_: list, offset: int = None, limit: int = None) -> list:
         return list_
 
 
-def _get_prediction_item(prediction: Prediction) -> PredictionItem:
+def _get_prediction_item(prediction: draug.homag.model.Prediction) -> PredictionItem:
     pred_node_id = prediction.predicted_nid
 
     eid_to_draug_entity = state.graph.get_entities(pred_node_id)
@@ -80,9 +80,9 @@ def _get_prediction_item(prediction: Prediction) -> PredictionItem:
     return PredictionItem(score=prediction.score, score_norm=prediction.score_norm, node=pred_node)
 
 
-def _get_candidate_with_predictions(candidate: str,
-                                    predictions: list[Prediction]
-                                    ) -> CandidateWithPredictions:
+def _build_prediction(candidate: str,
+                      predictions: list[draug.homag.model.Prediction]
+                      ) -> Prediction:
     parent_predictions: list[PredictionItem] = []
     synonym_predictions: list[PredictionItem] = []
 
@@ -96,12 +96,12 @@ def _get_candidate_with_predictions(candidate: str,
 
     total_score_norm, total_score = _calc_total_scores(synonym_predictions, parent_predictions)
 
-    return CandidateWithPredictions(candidate=candidate,
-                                    dismissed=False,
-                                    total_score=total_score,
-                                    total_score_norm=total_score_norm,
-                                    parent_predictions=parent_predictions,
-                                    synonym_predictions=synonym_predictions)
+    return Prediction(candidate=candidate,
+                      dismissed=False,
+                      total_score=total_score,
+                      total_score_norm=total_score_norm,
+                      parent_predictions=parent_predictions,
+                      synonym_predictions=synonym_predictions)
 
 
 def _calc_total_scores(synonym_predictions: list[PredictionItem], parent_predictions: list[PredictionItem]):

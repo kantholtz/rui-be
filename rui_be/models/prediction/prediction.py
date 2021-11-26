@@ -7,7 +7,7 @@ from rui_be.models.prediction.prediction_item import PredictionItem, PredictionI
 
 
 @dataclass
-class CandidateWithPredictions:
+class Prediction:
     candidate: str
     dismissed: bool
 
@@ -18,7 +18,7 @@ class CandidateWithPredictions:
     synonym_predictions: list[PredictionItem]
 
 
-class CandidateWithPredictionsSchema(CamelCaseSchema):
+class PredictionSchema(CamelCaseSchema):
     candidate = fields.String(required=True)
     dismissed = fields.Boolean(required=True)
 
@@ -29,8 +29,8 @@ class CandidateWithPredictionsSchema(CamelCaseSchema):
     synonym_predictions = fields.List(fields.Nested(PredictionItemSchema), required=True)
 
     @post_load
-    def make_obj(self, data, **kwargs) -> CandidateWithPredictions:
-        return CandidateWithPredictions(**data)
+    def make_obj(self, data, **kwargs) -> Prediction:
+        return Prediction(**data)
 
     class Meta:
         ordered = True
