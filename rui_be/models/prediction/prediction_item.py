@@ -7,20 +7,20 @@ from rui_be.models.node.node import Node, NodeSchema
 
 
 @dataclass
-class CandidatePrediction:
+class PredictionItem:
     score: float
     score_norm: float
     node: Node
 
 
-class CandidatePredictionSchema(CamelCaseSchema):
+class PredictionItemSchema(CamelCaseSchema):
     score = fields.Float(required=True)
     score_norm = fields.Float(require=True)
     node = fields.Nested(NodeSchema, required=True)
 
     @post_load
-    def make_obj(self, data, **kwargs) -> CandidatePrediction:
-        return CandidatePrediction(**data)
+    def make_obj(self, data, **kwargs) -> PredictionItem:
+        return PredictionItem(**data)
 
     class Meta:
         ordered = True

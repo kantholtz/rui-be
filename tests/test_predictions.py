@@ -1,7 +1,7 @@
 import urllib
 
 from rui_be.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
-from rui_be.models.prediction.prediction_response import PredictionResponseSchema, PredictionResponse
+from rui_be.models.prediction.predictions_page import PredictionsPageSchema, PredictionsPage
 from tests.common import upload
 from tests.fixtures.fixtures import deep_node_a
 
@@ -20,12 +20,12 @@ def test_get_predictions(client):
 
     assert response.status_code == 200
 
-    prediction_response: dict = response.get_json()
-    prediction_response: PredictionResponse = PredictionResponseSchema().load(prediction_response)
+    predictions_page: dict = response.get_json()
+    predictions_page: PredictionsPage = PredictionsPageSchema().load(predictions_page)
 
-    assert prediction_response.total_predictions == 3
-    assert prediction_response.predictions[0].total_score > prediction_response.predictions[1].total_score
-    assert prediction_response.predictions[1].total_score > prediction_response.predictions[2].total_score
+    assert predictions_page.total_predictions == 3
+    assert predictions_page.predictions[0].total_score > predictions_page.predictions[1].total_score
+    assert predictions_page.predictions[1].total_score > predictions_page.predictions[2].total_score
 
 
 def test_patch_prediction(client):
@@ -47,7 +47,7 @@ def test_patch_prediction(client):
 
     assert patch_prediction_response.status_code == 200
 
-    prediction_response: dict = client.get('http://localhost:5000/api/1.6.0/nodes/0/predictions').get_json()
-    prediction_response: PredictionResponse = PredictionResponseSchema().load(prediction_response)
+    predictions_page: dict = client.get('http://localhost:5000/api/1.6.0/nodes/0/predictions').get_json()
+    predictions_page: PredictionsPage = PredictionsPageSchema().load(predictions_page)
 
-    assert prediction_response.total_predictions == 2
+    assert predictions_page.total_predictions == 2

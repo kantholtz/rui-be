@@ -8,9 +8,7 @@ matches = Blueprint('matches', __name__)
 
 @matches.route('/api/1.6.0/matches', methods=['GET'])
 def get_matches() -> Response:
-    #
-    # Parse query params
-    #
+    ### Parse query params
 
     entity = int(request.args.get('entity'))
 
@@ -22,9 +20,7 @@ def get_matches() -> Response:
     if limit:
         limit = int(limit)
 
-    #
-    # Get matches from draug and apply pagination
-    #
+    ### Get matches from draug and apply pagination
 
     draug_matches = state.matches_store.by_eid(entity)
     matches: list[Match] = [Match(m.eid, m.ticket, m.context, m.mention, list(m.mention_idxs))
