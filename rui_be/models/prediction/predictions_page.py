@@ -7,18 +7,18 @@ from rui_be.models.prediction.candidate_with_predictions import CandidateWithPre
 
 
 @dataclass
-class PredictionResponse:
+class PredictionsPage:
     total_predictions: int
     predictions: list[CandidateWithPredictions]
 
 
-class PredictionResponseSchema(CamelCaseSchema):
+class PredictionsPageSchema(CamelCaseSchema):
     total_predictions = fields.Integer(required=True)
     predictions = fields.List(fields.Nested(CandidateWithPredictionsSchema), required=True)
 
     @post_load
-    def make_obj(self, data, **kwargs) -> PredictionResponse:
-        return PredictionResponse(**data)
+    def make_obj(self, data, **kwargs) -> PredictionsPage:
+        return PredictionsPage(**data)
 
     class Meta:
         ordered = True

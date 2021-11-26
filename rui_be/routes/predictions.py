@@ -8,7 +8,7 @@ from rui_be.models.node.node import Node
 from rui_be.models.prediction.prediction_item import PredictionItem
 from rui_be.models.prediction.candidate_with_predictions import CandidateWithPredictions
 from rui_be.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
-from rui_be.models.prediction.prediction_response import PredictionResponse, PredictionResponseSchema
+from rui_be.models.prediction.predictions_page import PredictionsPage, PredictionsPageSchema
 
 predictions = Blueprint('predictions', __name__)
 
@@ -46,10 +46,10 @@ def get_predictions(node_id: int) -> Response:
     # Add information about predicted node and build response
     #
 
-    prediction_response = PredictionResponse(total_predictions=len(candidate_with_predictions_list),
-                                             predictions=candidate_to_predictions_page)
+    predictions_page = PredictionsPage(total_predictions=len(candidate_with_predictions_list),
+                                       predictions=candidate_to_predictions_page)
 
-    return jsonify(PredictionResponseSchema().dump(prediction_response))
+    return jsonify(PredictionsPageSchema().dump(predictions_page))
 
 
 def _paginate(list_: list, offset: int = None, limit: int = None) -> list:
