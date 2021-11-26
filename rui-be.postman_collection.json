@@ -6,272 +6,297 @@
 	},
 	"item": [
 		{
-			"name": "/upload",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "symptaxUploadZip",
-							"type": "file",
-							"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax_upload_v7_random.zip"
+			"name": "upload",
+			"item": [
+				{
+					"name": "/upload",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "symptaxUploadZip",
+									"type": "file",
+									"src": "/C:/Users/Tobias/Documents/HSRM/Hiwi/RUI/Data/symptax_upload_v7_random.zip"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"upload"
+							]
 						}
-					]
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "nodes",
+			"item": [
+				{
+					"name": "/nodes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/nodes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"nodes"
+							]
+						}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/upload",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"upload"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/nodes",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/nodes",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"nodes"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/nodes",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"parentId\": 0,\r\n    \"entities\": [\r\n        {\r\n            \"name\": \"Ac-1\"\r\n        }\r\n    ]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+				{
+					"name": "/nodes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"parentId\": 0,\r\n    \"entities\": [\r\n        {\r\n            \"name\": \"Ac-1\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/nodes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"nodes"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/nodes",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"nodes"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/nodes/{nodeId}",
-			"request": {
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"parentId\": null\r\n}\r\n",
-					"options": {
-						"raw": {
-							"language": "json"
+				{
+					"name": "/nodes/{nodeId}",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"parentId\": null\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/nodes/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"nodes",
+								"4"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/nodes/4",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"nodes",
-						"4"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/nodes/{nodeId}",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/nodes/4",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"nodes",
-						"4"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/entities",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"nodeId\": 1,\r\n    \"name\": \"Aa-2\"\r\n}\r\n",
-					"options": {
-						"raw": {
-							"language": "json"
+				{
+					"name": "/nodes/{nodeId}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/nodes/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"nodes",
+								"4"
+							]
 						}
-					}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "entities",
+			"item": [
+				{
+					"name": "/entities",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nodeId\": 1,\r\n    \"name\": \"Aa-2\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/entities",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"entities"
+							]
+						}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/entities",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"entities"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/entities/{entityId}",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/entities/8",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"entities",
-						"8"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/matches",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/matches?entity=0",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"matches"
-					],
-					"query": [
-						{
-							"key": "entity",
-							"value": "0"
+				{
+					"name": "/entities/{entityId}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/entities/8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"entities",
+								"8"
+							]
 						}
-					]
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "/nodes/{nodeId}/predictions",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/nodes/0/predictions",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"nodes",
-						"0",
-						"predictions"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/predictions/{candidate}",
-			"request": {
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"dismissed\": true\r\n}\r\n",
-					"options": {
-						"raw": {
-							"language": "json"
+			"name": "matches",
+			"item": [
+				{
+					"name": "/matches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/matches?entity=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"matches"
+							],
+							"query": [
+								{
+									"key": "entity",
+									"value": "0"
+								}
+							]
 						}
-					}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "predictions",
+			"item": [
+				{
+					"name": "/nodes/{nodeId}/predictions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/nodes/0/predictions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"nodes",
+								"0",
+								"predictions"
+							]
+						}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:5000/api/1.6.0/predictions/Erat%20imperdiet%20sed%20euismod%20nisi%20porta%20lorem%20mollis%20.",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"1.6.0",
-						"predictions",
-						"Erat%20imperdiet%20sed%20euismod%20nisi%20porta%20lorem%20mollis%20."
-					]
+				{
+					"name": "/predictions/{candidate}",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"dismissed\": true\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/1.6.0/predictions/Erat%20imperdiet%20sed%20euismod%20nisi%20porta%20lorem%20mollis%20.",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"1.6.0",
+								"predictions",
+								"Erat%20imperdiet%20sed%20euismod%20nisi%20porta%20lorem%20mollis%20."
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		}
 	]
 }
