@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from marshmallow import fields, post_load
 
 from rui_be.models.camel_case_schema import CamelCaseSchema
-from rui_be.models.prediction.candidate_prediction import CandidatePrediction, CandidatePredictionSchema
+from rui_be.models.prediction.prediction_item import PredictionItem, PredictionItemSchema
 
 
 @dataclass
@@ -14,8 +14,8 @@ class CandidateWithPredictions:
     total_score: float
     total_score_norm: float
 
-    parent_predictions: list[CandidatePrediction]
-    synonym_predictions: list[CandidatePrediction]
+    parent_predictions: list[PredictionItem]
+    synonym_predictions: list[PredictionItem]
 
 
 class CandidateWithPredictionsSchema(CamelCaseSchema):
@@ -25,8 +25,8 @@ class CandidateWithPredictionsSchema(CamelCaseSchema):
     total_score = fields.Float(required=True)
     total_score_norm = fields.Float(required=True)
 
-    parent_predictions = fields.List(fields.Nested(CandidatePredictionSchema), required=True)
-    synonym_predictions = fields.List(fields.Nested(CandidatePredictionSchema), required=True)
+    parent_predictions = fields.List(fields.Nested(PredictionItemSchema), required=True)
+    synonym_predictions = fields.List(fields.Nested(PredictionItemSchema), required=True)
 
     @post_load
     def make_obj(self, data, **kwargs) -> CandidateWithPredictions:

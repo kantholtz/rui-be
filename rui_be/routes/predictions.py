@@ -5,7 +5,7 @@ from flask import Blueprint, Response, request, jsonify
 from rui_be import state
 from rui_be.models.entity.entity import Entity
 from rui_be.models.node.node import Node
-from rui_be.models.prediction.candidate_prediction import CandidatePrediction
+from rui_be.models.prediction.prediction_item import PredictionItem
 from rui_be.models.prediction.candidate_with_predictions import CandidateWithPredictions
 from rui_be.models.prediction.prediction_patch import PredictionPatch, PredictionPatchSchema
 from rui_be.models.prediction.prediction_response import PredictionResponse, PredictionResponseSchema
@@ -63,7 +63,7 @@ def _paginate(list_: list, offset: int = None, limit: int = None) -> list:
         return list_
 
 
-def _get_candiate_prediction(prediction: Prediction) -> CandidatePrediction:
+def _get_prediction_item(prediction: Prediction) -> PredictionItem:
     pred_node_id = prediction.predicted_nid
 
     eid_to_draug_entity = state.graph.get_entities(pred_node_id)
@@ -77,22 +77,22 @@ def _get_candiate_prediction(prediction: Prediction) -> CandidatePrediction:
                      parent_id=state.graph.get_parent(pred_node_id),
                      entities=entities)
 
-    return CandidatePrediction(score=prediction.score, score_norm=prediction.score_norm, node=pred_node)
+    return PredictionItem(score=prediction.score, score_norm=prediction.score_norm, node=pred_node)
 
 
 def _get_candidate_with_predictions(candidate: str,
                                     predictions: list[Prediction]
                                     ) -> CandidateWithPredictions:
-    parent_predictions: list[CandidatePrediction] = []
-    synonym_predictions: list[CandidatePrediction] = []
+    parent_predictions: list[PredictionItem] = []
+    synonym_predictions: list[PredictionItem] = []
 
     for prediction in predictions:
-        candidate_prediction = _get_candiate_prediction(prediction)
+        prediction_item = _get_prediction_item(prediction)
 
         if prediction.relation == Graph.RELATIONS.parent:
-            parent_predictions.append(candidate_prediction)
+            parent_predictions.append(prediction_item)
         elif prediction.relation == Graph.RELATIONS.synonym:
-            synonym_predictions.append(candidate_prediction)
+            synonym_predictions.append(prediction_item)
 
     total_score_norm, total_score = _calc_total_scores(synonym_predictions, parent_predictions)
 
@@ -104,7 +104,7 @@ def _get_candidate_with_predictions(candidate: str,
                                     synonym_predictions=synonym_predictions)
 
 
-def _calc_total_scores(synonym_predictions: list[CandidatePrediction], parent_predictions: list[CandidatePrediction]):
+def _calc_total_scores(synonym_predictions: list[PredictionItem], parent_predictions: list[PredictionItem]):
     if len(synonym_predictions) > 0 and len(parent_predictions) > 0:
         return ((synonym_predictions[0].score_norm + parent_predictions[0].score_norm) / 2,
                 (synonym_predictions[0].score + parent_predictions[0].score) / 2)
