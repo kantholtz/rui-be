@@ -31,8 +31,8 @@ jobs:
           tags: |
             xvlcw/rui-be:latest
             xvlcw/rui-be:0
-            xvlcw/rui-be:0.10
-            xvlcw/rui-be:0.10.0
+            xvlcw/rui-be:0.11
+            xvlcw/rui-be:0.11.0
 
   test_docker:
     needs: deliver_docker
@@ -40,7 +40,7 @@ jobs:
     steps:
 
       - name: Start backend
-        run: docker run --name rui-be --publish "5000:5000" --detach xvlcw/rui-be:0.10.0
+        run: docker run --name rui-be --publish "5000:5000" --detach xvlcw/rui-be:0.11.0
 
       - name: Wait for server
         uses: cygnetdigital/wait_for_response@v2.0.0
