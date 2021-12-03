@@ -28,7 +28,7 @@ jobs:
         with:
           push: true
           ssh: default
-          tags: xvlcw/rui-be:0.10.0-${{ env.GITHUB_REF_SLUG }}
+          tags: xvlcw/rui-be:0.11.0-${{ env.GITHUB_REF_SLUG }}
 
   test_docker:
     needs: deliver_docker
@@ -39,7 +39,7 @@ jobs:
         uses: rlespinasse/github-slug-action@v3.x
 
       - name: Start backend
-        run: docker run --name rui-be --publish "5000:5000" --detach xvlcw/rui-be:0.10.0-${{ env.GITHUB_REF_SLUG }}
+        run: docker run --name rui-be --publish "5000:5000" --detach xvlcw/rui-be:0.11.0-${{ env.GITHUB_REF_SLUG }}
 
       - name: Wait for server
         uses: cygnetdigital/wait_for_response@v2.0.0
