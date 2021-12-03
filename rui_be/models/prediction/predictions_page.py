@@ -9,11 +9,15 @@ from rui_be.models.prediction.prediction import PredictionSchema, Prediction
 @dataclass
 class PredictionsPage:
     total_predictions: int
+    total_synonym_predictions: int
+    total_child_predictions: int
     predictions: list[Prediction]
 
 
 class PredictionsPageSchema(CamelCaseSchema):
     total_predictions = fields.Integer(required=True)
+    total_synonym_predictions = fields.Integer(required=True)
+    total_child_predictions = fields.Integer(required=True)
     predictions = fields.List(fields.Nested(PredictionSchema), required=True)
 
     @post_load

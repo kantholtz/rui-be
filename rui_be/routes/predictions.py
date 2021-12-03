@@ -39,6 +39,15 @@ def get_predictions(node_id: int) -> Response:
 
     partial_predictions.sort(key=lambda it: (it.total_score_norm, it.total_score), reverse=True)
 
+    ### Count total synonym and child predictions
+
+    total_synonym_predictions = 0
+    total_child_predictions = 0
+
+    for partial_prediction in partial_predictions:
+        total_synonym_predictions += len(partial_prediction.synonym_predictions)
+        total_child_predictions += len(partial_prediction.parent_predictions)
+
     ### Paginate partial predictions
 
     paged_partial_predictions = _paginate(partial_predictions, offset, limit)
@@ -51,6 +60,8 @@ def get_predictions(node_id: int) -> Response:
     ### Add information about predicted node and build response
 
     predictions_page = PredictionsPage(total_predictions=len(partial_predictions),
+                                       total_synonym_predictions=total_synonym_predictions,
+                                       total_child_predictions=total_child_predictions,
                                        predictions=predictions)
 
     return jsonify(PredictionsPageSchema().dump(predictions_page))
