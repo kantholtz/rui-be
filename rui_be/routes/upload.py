@@ -1,5 +1,8 @@
-import os
+# -*- coding: utf-8 -*-
+
+import logging
 import zipfile
+import tempfile
 from pathlib import Path
 
 from draug.homag.graph import Graph
@@ -11,35 +14,36 @@ from werkzeug.utils import secure_filename
 
 from rui_be import state
 
+
+log = logging.getLogger(__name__)
 upload = Blueprint("upload", __name__)
 
 
 @upload.route("/api/1.6.0/upload", methods=["PUT"])
 def put_upload() -> str:
-    symptax_upload_zip: FileStorage = request.files["symptaxUploadZip"]
+    zip: FileStorage = request.files["symptaxUploadZip"]
 
-    upload_dir = Path(os.path.join(os.getcwd(), "data"))
-    upload_dir.mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory() as upload_dir:
+        log.info(f"uploading zip to {upload_dir}")
 
-    upload_filename = secure_filename(symptax_upload_zip.filename)
-    upload_path = os.path.join(upload_dir, upload_filename)
+        fname = secure_filename(zip.filename)
+        zip_path = Path(fname) / fname
 
-    symptax_upload_zip.save(upload_path)
+        zip.save(zip_path)
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            zip_ref.extractall(upload_dir)
 
-    with zipfile.ZipFile(os.path.join(upload_dir, upload_filename), "r") as zip_ref:
-        zip_ref.extractall(upload_dir)
+        path = zip_path.parent / zip_path.stem
+        log.info("extracted data, populating state")
 
-    extracted_dir = os.path.splitext(upload_path)[0]
+        # populate state
+        state.graph = Graph.from_dir(path=path)
+        state.matches_store = Matches.from_file(path / "match.txt")
+        state.predictions_store = Predictions.from_files(
+            path / "parent.csv",
+            path / "synonym.csv",
+        )
 
-    # update state
-
-    state.graph = Graph.from_dir(extracted_dir)
-
-    match_txt: str = os.path.join(extracted_dir, "match.txt")
-    state.matches_store = Matches.from_file(match_txt, state.graph)
-
-    parent_csv: str = os.path.join(extracted_dir, "parent.csv")
-    synonym_csv: str = os.path.join(extracted_dir, "synonym.csv")
-    state.predictions_store = Predictions.from_files({parent_csv, synonym_csv})
+        log.info("state populated")
 
     return ""

@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# initializes logging
+import rui_be  # noqa: F401
+
 from flask import Flask
 from flask_cors import CORS
 
@@ -10,7 +15,7 @@ from rui_be.routes.upload import upload
 
 def main():
     app = create_app()
-    app.run(host='0.0.0.0')
+    app.run(host="0.0.0.0")
 
 
 def create_app(config=None) -> Flask:
@@ -21,11 +26,11 @@ def create_app(config=None) -> Flask:
 
     CORS(app)
 
-    app.config['JSON_SORT_KEYS'] = False  # Simplify debugging in frontend
+    app.config["JSON_SORT_KEYS"] = False  # Simplify debugging in frontend
 
-    @app.route('/')
+    @app.route("/")
     def get_root():
-        return 'Server is up'
+        return "Server is up"
 
     app.register_blueprint(entities)
     app.register_blueprint(matches)

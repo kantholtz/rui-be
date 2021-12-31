@@ -1,0 +1,29 @@
+
+version: 1
+
+formatters:
+  standard:
+    format: '[%(asctime)s] %(name)s %(levelname)7s [%(process)5d] | %(message)s'
+    datefmt: '%m.%d | %H:%M:%S'
+
+handlers:
+  rui:
+    class: logging.FileHandler
+    filename: data/rui.log
+    formatter: standard
+  werkzeug:
+    class: logging.FileHandler
+    filename: data/werkzeug.log
+    formatter: standard
+
+loggers:
+
+  root:
+    level: INFO
+    handlers:
+      - rui
+
+  werkzeug:
+    propagate: false
+    handlers:
+      - werkzeug
