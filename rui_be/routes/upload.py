@@ -27,7 +27,7 @@ def put_upload() -> str:
         log.info(f"uploading zip to {upload_dir}")
 
         fname = secure_filename(zip.filename)
-        zip_path = Path(fname) / fname
+        zip_path = Path(upload_dir) / fname
 
         zip.save(zip_path)
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
@@ -38,7 +38,12 @@ def put_upload() -> str:
 
         # populate state
         state.graph = Graph.from_dir(path=path)
-        state.matches_store = Matches.from_file(path / "match.txt")
+
+        state.matches_store = Matches.from_file(
+            path=path / "match.txt",
+            graph=state.graph,
+        )
+
         state.predictions_store = Predictions.from_files(
             path / "parent.csv",
             path / "synonym.csv",

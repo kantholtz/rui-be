@@ -10,7 +10,10 @@ from rui_be.models.prediction import Predictions
 
 from flask import Blueprint, Response, request, jsonify
 
+import logging
 
+
+log = logging.getLogger(__name__)
 predictions = Blueprint("predictions", __name__)
 
 
@@ -47,8 +50,7 @@ def get_predictions(nid: int) -> Response:
 
     # retrieve and assemble data
 
-    store = state.predictions_store
-    draug_predictions = store.predictions.by_nid(nid=nid)
+    draug_predictions = state.predictions_store.by_nid(nid=nid)
 
     def create_predictions(rel: Graph.RELATIONS):
         return [
@@ -64,3 +66,10 @@ def get_predictions(nid: int) -> Response:
     )
 
     return jsonify(Predictions.Schema().dump(preds))
+
+
+@predictions.route("/api/1.6.0/predictions/<int:pid>", methods=["DELETE"])
+def del_prediction(pid: int) -> Response:
+    log.info(f"deleting prediction: {pid}")
+    state.predictions_store.del_prediction(pid=pid)
+    return ""

@@ -16,6 +16,9 @@ class Prediction:
     # --
     class Schema(CamelCaseSchema):
 
+        pid = fields.Integer(required=True)
+        nid = fields.Integer(required=True)
+
         score = fields.Float(required=True)
         score_norm = fields.Float(required=True)
 
@@ -28,6 +31,9 @@ class Prediction:
 
     # --
 
+    pid: int
+    nid: int
+
     score: float
     score_norm: float
 
@@ -39,6 +45,8 @@ class Prediction:
     @classmethod
     def from_draug(Self, pred: draug.Prediction, node: Node):
         return Self(
+            pid=pred.pid,
+            nid=pred.nid,
             score_norm=pred.score_norm,
             score=pred.score,
             context=pred.context,
@@ -53,7 +61,8 @@ class Predictions:
 
     class Schema(CamelCaseSchema):
 
-        total = fields.Integer(required=True)
+        total_synonyms = fields.Integer(required=True)
+        total_children = fields.Integer(required=True)
 
         synonyms = fields.List(fields.Nested(Prediction.Schema), required=True)
         children = fields.List(fields.Nested(Prediction.Schema), required=True)
