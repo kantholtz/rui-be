@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import logging
+from dataclasses import asdict
+
 from draug.homag.graph import Graph
 
 from rui_be import state
+from rui_be import changelog
 from rui_be.models.entities import Entity
 
 from rui_be.models.nodes import Node
@@ -10,8 +14,6 @@ from rui_be.models.predictions import Prediction
 from rui_be.models.predictions import Predictions
 
 from flask import Blueprint, Response, request, jsonify
-
-import logging
 
 
 log = logging.getLogger(__name__)
@@ -72,5 +74,13 @@ def get_predictions(nid: int) -> Response:
 @blueprint.route("/api/1.6.0/predictions/<int:pid>", methods=["DELETE"])
 def del_prediction(pid: int) -> Response:
     log.info(f"deleting prediction: {pid}")
+
+    pred = state.predictions_store.by_pid(pid=pid)
     state.predictions_store.del_prediction(pid=pid)
+
+    changelog.append(
+        kind=changelog.Kind.PRED_DEL,
+        data={"prediction": asdict(pred)},
+    )
+
     return ""

@@ -1,9 +1,12 @@
 import logging
+from dataclasses import asdict
 
 import draug.homag.graph
+
 from flask import Blueprint, Response, request, jsonify
 
 from rui_be import state
+from rui_be import changelog
 from rui_be.models.nodes import PostNode
 from rui_be.models.nodes import DeepNode
 from rui_be.models.nodes import NodePatch
@@ -49,36 +52,56 @@ def get_nodes() -> Response:
 
 @blueprint.route("/api/1.6.0/nodes", methods=["POST"])
 def post_node() -> tuple[str, int]:
-    request_data: dict = request.get_json()
+    req: PostNode = PostNode.Schema().load(request.get_json())
 
-    new_node: PostNode = PostNode.Schema().load(request_data)
-
-    new_nid = state.graph.add_node(
-        entities=[draug.homag.graph.Entity(ent.name) for ent in new_node.entities]
+    nid = state.graph.add_node(
+        entities=[draug.homag.graph.Entity(ent.name) for ent in req.entities]
     )
 
-    if new_node.pid is not None:
-        state.graph.set_parent(new_nid, new_node.pid)
+    if req.pid is not None:
+        state.graph.set_parent(nid, req.pid)
+
+    changelog.append(
+        kind=changelog.Kind.NODE_ADD,
+        data={
+            "nid": nid,
+            "node": state.graph.nxg.nodes[nid],
+            "request": asdict(req),
+        },
+    )
 
     return "", 201
 
 
 @blueprint.route("/api/1.6.0/nodes/<int:nid>", methods=["PATCH"])
 def patch_node(nid: int) -> str:
-    request_data: dict = request.get_json()
+    req: NodePatch = NodePatch.Schema().load(request.get_json())
 
-    node_patch: NodePatch = NodePatch.Schema().load(request_data)
-
-    if node_patch.pid is None and state.graph.get_parent(nid) is not None:
+    # ????
+    if req.pid is None and state.graph.get_parent(nid) is not None:
         state.graph.del_parent(nid)
 
-    elif node_patch.pid is not None:
-        state.graph.set_parent(nid, node_patch.pid)
+    elif req.pid is not None:
+        state.graph.set_parent(nid=nid, pid=req.pid)
+
+    changelog.append(
+        kind=changelog.Kind.NODE_CNG,
+        data={"request": asdict(req)},
+    )
 
     return ""
 
 
 @blueprint.route("/api/1.6.0/nodes/<int:nid>", methods=["DELETE"])
 def delete_node(nid: int) -> str:
-    state.graph.del_node(nid)
+    nids = state.graph.del_node(nid)
+
+    changelog.append(
+        kind=changelog.Kind.NODE_DEL,
+        data={
+            "nid": nid,
+            "deleted_nids": nids,
+        },
+    )
+
     return ""

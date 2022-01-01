@@ -2,26 +2,49 @@ import draug.homag.graph
 from flask import Blueprint, request
 
 from rui_be import state
+from rui_be import changelog
 from rui_be.models.entities import PostEntity
 
+import logging
+from dataclasses import asdict
+
+
+log = logging.getLogger(__name__)
 blueprint = Blueprint("entities", __name__)
 
 
 @blueprint.route("/api/1.6.0/entities", methods=["POST"])
 def post_entity() -> tuple[str, int]:
-    request_data: dict = request.get_json()
+    req: PostEntity = PostEntity.Schema().load(request.get_json())
 
-    new_entity: PostEntity = PostEntity.Schema().load(request_data)
+    eid = state.graph.add_entity(
+        nid=req.nid,
+        ent=draug.homag.graph.Entity(name=req.name),
+    )
 
-    state.graph.add_entity(
-        new_entity.node_id, draug.homag.graph.Entity(new_entity.name)
+    changelog.append(
+        kind=changelog.Kind.ENTITY_ADD,
+        data={
+            "nid": req.nid,
+            "entity": asdict(state.graph.get_entity(eid=eid)),
+        },
     )
 
     return "", 201
 
 
-@blueprint.route("/api/1.6.0/entities/<int:entity_id>", methods=["DELETE"])
-def delete_entity(entity_id: int) -> str:
-    state.graph.del_entity(entity_id)
+@blueprint.route("/api/1.6.0/entities/<int:eid>", methods=["DELETE"])
+def delete_entity(eid: int) -> str:
+
+    ent = state.graph.get_entity(eid=eid)
+    state.graph.del_entity(eid=eid)
+
+    changelog.append(
+        kind=changelog.Kind.ENTITY_DEL,
+        data={
+            "eid": eid,
+            "entity": asdict(ent),
+        },
+    )
 
     return ""
