@@ -5,8 +5,17 @@ formatters:
   standard:
     format: '[%(asctime)s] %(name)s %(levelname)7s [%(process)5d] | %(message)s'
     datefmt: '%m.%d | %H:%M:%S'
+  passthrough:
+    # ISO 8601 date format
+    format: '%(asctime)s.%(msecs)03d %(message)s'
+    datefmt: "%Y-%m-%dT%H:%M:%S"
+
 
 handlers:
+  changelog:
+    class: logging.FileHandler
+    filename: data/changes.log
+    formatter: passthrough
   rui:
     class: logging.FileHandler
     filename: data/rui.log
@@ -22,6 +31,11 @@ loggers:
     level: INFO
     handlers:
       - rui
+
+  changelog:
+    propagate: false
+    handlers:
+      - changelog
 
   werkzeug:
     propagate: false

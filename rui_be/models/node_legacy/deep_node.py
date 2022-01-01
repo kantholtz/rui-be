@@ -9,9 +9,9 @@ from rui_be.models.entity.entity import EntitySchema, Entity
 
 @dataclass(order=True)  # order=True to faciliate comparing lists in test's diff view
 class DeepNode:
-    id: int
 
-    parent_id: Optional[int]
+    nid: int
+    pid: Optional[int]
 
     entities: list[Entity]
     children: list  # list[DeepNode]

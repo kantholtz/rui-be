@@ -6,11 +6,11 @@ import rui_be  # noqa: F401
 from flask import Flask
 from flask_cors import CORS
 
-from rui_be.routes.entities import entities
-from rui_be.routes.matches import matches
-from rui_be.routes.nodes import nodes
-from rui_be.routes.predictions import predictions
-from rui_be.routes.upload import upload
+from rui_be.routes.entities import blueprint as entities
+from rui_be.routes.matches import blueprint as matches
+from rui_be.routes.nodes import blueprint as nodes
+from rui_be.routes.predictions import blueprint as predictions
+from rui_be.routes.upload import blueprint as upload
 
 
 def main():

@@ -8,11 +8,11 @@ from rui_be.models.camel_case_schema import CamelCaseSchema
 
 @dataclass
 class NodePatch:
-    parent_id: Optional[int]
+    pid: Optional[int]
 
 
 class NodePatchSchema(CamelCaseSchema):
-    parent_id = fields.Integer(required=True, allow_none=True)
+    pid = fields.Integer(required=True, allow_none=True)
 
     @post_load
     def make_obj(self, data, **kwargs) -> NodePatch:

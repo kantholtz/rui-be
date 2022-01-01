@@ -1,82 +1,84 @@
+import logging
+
 import draug.homag.graph
 from flask import Blueprint, Response, request, jsonify
 
 from rui_be import state
-from rui_be.models.entity.entity import Entity
-from rui_be.models.node.deep_node import DeepNode, DeepNodeSchema
-from rui_be.models.node.node_patch import NodePatch, NodePatchSchema
-from rui_be.models.node.post_node import PostNode, PostNodeSchema
-
-nodes = Blueprint("nodes", __name__)
+from rui_be.models.nodes import PostNode
+from rui_be.models.nodes import DeepNode
+from rui_be.models.nodes import NodePatch
+from rui_be.models.entities import Entity
 
 
-@nodes.route("/api/1.6.0/nodes", methods=["GET"])
+log = logging.getLogger(__name__)
+blueprint = Blueprint("nodes", __name__)
+
+
+@blueprint.route("/api/1.6.0/nodes", methods=["GET"])
 def get_nodes() -> Response:
-    root_node_ids = state.graph.roots
+    root_nids = state.graph.roots
 
     # Build and return list of recusively populated nodes
 
-    def deep_node_from_node_id(node_id: int) -> DeepNode:
-        entity_ids = state.graph.get_entities(node_id)
+    def deep_node_from_nid(nid: int) -> DeepNode:
+        eids = state.graph.get_entities(nid)
 
         return DeepNode(
-            id=node_id,
-            parent_id=state.graph.get_parent(node_id),
+            nid=nid,
+            pid=state.graph.get_parent(nid),
             entities=[
                 Entity(
-                    entity_id,
-                    node_id,
-                    state.graph.get_entity(entity_id).name,
-                    len(state.matches_store.by_eid(entity_id)),
+                    eid=eid,
+                    nid=nid,
+                    name=state.graph.get_entity(eid).name,
+                    matches_count=len(state.matches_store.by_eid(eid)),
                 )
-                for entity_id in entity_ids
+                for eid in eids
             ],
             children=[
-                deep_node_from_node_id(child)
-                for child in state.graph.get_children(node_id)
+                deep_node_from_nid(child) for child in state.graph.get_children(nid)
             ],
         )
 
     deep_nodes: list[DeepNode] = [
-        deep_node_from_node_id(root_node_id) for root_node_id in root_node_ids
+        deep_node_from_nid(root_nid) for root_nid in root_nids
     ]
 
-    return jsonify(DeepNodeSchema(many=True).dump(deep_nodes))
+    return jsonify(DeepNode.Schema(many=True).dump(deep_nodes))
 
 
-@nodes.route("/api/1.6.0/nodes", methods=["POST"])
+@blueprint.route("/api/1.6.0/nodes", methods=["POST"])
 def post_node() -> tuple[str, int]:
     request_data: dict = request.get_json()
 
-    new_node: PostNode = PostNodeSchema().load(request_data)
+    new_node: PostNode = PostNode.Schema().load(request_data)
 
-    new_node_id = state.graph.add_node(
+    new_nid = state.graph.add_node(
         entities=[draug.homag.graph.Entity(ent.name) for ent in new_node.entities]
     )
 
-    if new_node.parent_id is not None:
-        state.graph.set_parent(new_node_id, new_node.parent_id)
+    if new_node.pid is not None:
+        state.graph.set_parent(new_nid, new_node.pid)
 
     return "", 201
 
 
-@nodes.route("/api/1.6.0/nodes/<int:node_id>", methods=["PATCH"])
-def patch_node(node_id: int) -> str:
+@blueprint.route("/api/1.6.0/nodes/<int:nid>", methods=["PATCH"])
+def patch_node(nid: int) -> str:
     request_data: dict = request.get_json()
 
-    node_patch: NodePatch = NodePatchSchema().load(request_data)
+    node_patch: NodePatch = NodePatch.Schema().load(request_data)
 
-    if node_patch.parent_id is None and state.graph.get_parent(node_id) is not None:
-        state.graph.del_parent(node_id)
+    if node_patch.pid is None and state.graph.get_parent(nid) is not None:
+        state.graph.del_parent(nid)
 
-    elif node_patch.parent_id is not None:
-        state.graph.set_parent(node_id, node_patch.parent_id)
+    elif node_patch.pid is not None:
+        state.graph.set_parent(nid, node_patch.pid)
 
     return ""
 
 
-@nodes.route("/api/1.6.0/nodes/<int:node_id>", methods=["DELETE"])
-def delete_node(node_id: int) -> str:
-    state.graph.del_node(node_id)
-
+@blueprint.route("/api/1.6.0/nodes/<int:nid>", methods=["DELETE"])
+def delete_node(nid: int) -> str:
+    state.graph.del_node(nid)
     return ""

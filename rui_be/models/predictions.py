@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from marshmallow import fields, post_load
 
-from rui_be.models.node.node import Node, NodeSchema
+from rui_be.models.nodes import Node
 from rui_be.models.camel_case_schema import CamelCaseSchema
 
 from draug.homag import model as draug
@@ -23,7 +23,7 @@ class Prediction:
         score_norm = fields.Float(required=True)
 
         context = fields.String(required=True)
-        node = fields.Nested(NodeSchema, required=True)
+        node = fields.Nested(Node.Schema, required=True)
 
         @post_load
         def make_obj(self, data, **kwargs) -> "Prediction":
@@ -39,8 +39,6 @@ class Prediction:
 
     context: str
     node: Node
-
-    # --
 
     @classmethod
     def from_draug(Self, pred: draug.Prediction, node: Node):
@@ -73,8 +71,6 @@ class Predictions:
 
         class Meta:
             ordered = True
-
-    # --
 
     total_synonyms: int
     total_children: int

@@ -9,13 +9,13 @@ from rui_be.models.entity.post_node_entity import PostNodeEntitySchema, PostNode
 
 @dataclass
 class PostNode:
-    parent_id: Optional[int]
+    pid: Optional[int]
 
     entities: list[PostNodeEntity]
 
 
 class PostNodeSchema(CamelCaseSchema):
-    parent_id = fields.Integer(required=True, allow_none=True)
+    pid = fields.Integer(required=True, allow_none=True)
 
     entities = fields.List(fields.Nested(PostNodeEntitySchema), required=True)
 

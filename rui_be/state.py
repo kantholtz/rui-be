@@ -1,3 +1,5 @@
+import logging
+
 from draug.homag.graph import Graph
 from draug.homag.model import Predictions
 from draug.homag.text import Matches

@@ -9,17 +9,17 @@ from rui_be.models.entity.entity import EntitySchema, Entity
 
 @dataclass
 class Node:
-    id: int
 
-    parent_id: Optional[int]
+    nid: int  # node id
+    pid: Optional[int]  # parent id
 
     entities: list[Entity]
 
 
 class NodeSchema(CamelCaseSchema):
-    id = fields.Integer(required=True)
 
-    parent_id = fields.Integer(required=True, allow_none=True)
+    nid = fields.Integer(required=True)
+    pid = fields.Integer(required=True, allow_none=True)
 
     entities = fields.List(fields.Nested(EntitySchema), required=True)
 
