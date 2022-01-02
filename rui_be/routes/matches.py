@@ -27,7 +27,7 @@ def get_matches() -> Response:
 
     draug_matches = state.matches_store.by_eid(entity)
     matches: list[Match] = [
-        Match(m.eid, m.ticket, m.context, m.mention, list(m.mention_idxs))
+        Match(m.eid, m.identifier, m.context, m.mention, list(m.mention_idxs))
         for m in draug_matches
     ]
 
