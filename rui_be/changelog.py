@@ -21,6 +21,7 @@ class Kind(enum.Enum):
     NODE_CNG = "change node"
 
     PRED_DEL = "delete prediction"
+    PRED_ANN = "annotate prediction"
 
 
 def append(kind: Kind, data: dict):

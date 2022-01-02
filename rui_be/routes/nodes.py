@@ -12,12 +12,14 @@ from rui_be.models.nodes import DeepNode
 from rui_be.models.nodes import NodePatch
 from rui_be.models.entities import Entity
 
+from rui_be.routes import ENDPOINT
+
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint("nodes", __name__)
 
 
-@blueprint.route("/api/1.6.0/nodes", methods=["GET"])
+@blueprint.route(f"{ENDPOINT}/nodes", methods=["GET"])
 def get_nodes() -> Response:
     root_nids = state.graph.roots
 
@@ -50,7 +52,7 @@ def get_nodes() -> Response:
     return jsonify(DeepNode.Schema(many=True).dump(deep_nodes))
 
 
-@blueprint.route("/api/1.6.0/nodes", methods=["POST"])
+@blueprint.route(f"{ENDPOINT}/nodes", methods=["POST"])
 def post_node() -> tuple[str, int]:
     req: PostNode = PostNode.Schema().load(request.get_json())
 
@@ -73,7 +75,7 @@ def post_node() -> tuple[str, int]:
     return "", 201
 
 
-@blueprint.route("/api/1.6.0/nodes/<int:nid>", methods=["PATCH"])
+@blueprint.route(f"{ENDPOINT}/nodes/<int:nid>", methods=["PATCH"])
 def patch_node(nid: int) -> str:
     req: NodePatch = NodePatch.Schema().load(request.get_json())
 
@@ -92,7 +94,7 @@ def patch_node(nid: int) -> str:
     return ""
 
 
-@blueprint.route("/api/1.6.0/nodes/<int:nid>", methods=["DELETE"])
+@blueprint.route(f"{ENDPOINT}/nodes/<int:nid>", methods=["DELETE"])
 def delete_node(nid: int) -> str:
     nids = state.graph.del_node(nid)
 

@@ -85,8 +85,8 @@ class PostNode:
     # --
 
     class Schema(CamelCaseSchema):
-        pid = fields.Integer(required=True, allow_none=True)
 
+        pid = fields.Integer(required=True, allow_none=True)
         entities = fields.List(fields.Nested(PostNodeEntity.Schema), required=True)
 
         @post_load

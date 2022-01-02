@@ -18,12 +18,14 @@ from werkzeug.utils import secure_filename
 from rui_be import state
 from rui_be import changelog
 
+from rui_be.routes import ENDPOINT
+
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint("upload", __name__)
 
 
-@blueprint.route("/api/1.6.0/upload", methods=["PUT"])
+@blueprint.route(f"{ENDPOINT}/upload", methods=["PUT"])
 def put_upload() -> str:
     zip: FileStorage = request.files["symptaxUploadZip"]
 

@@ -77,3 +77,23 @@ class Predictions:
 
     synonyms: list[Prediction]
     children: list[Prediction]
+
+
+@dataclass
+class Annotation:
+
+    # --
+
+    class Schema(CamelCaseSchema):
+
+        nid = fields.Integer(required=True)
+        relation = fields.String(required=True)
+        phrase = fields.String(required=True)
+
+        @post_load
+        def make_obj(self, data, **kwargs) -> "Annotation":
+            return Annotation(**data)
+
+    nid: int
+    relation: str
+    phrase: str

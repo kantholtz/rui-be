@@ -3,11 +3,13 @@ from flask import Blueprint, Response, request, jsonify
 from rui_be import state
 from rui_be.models.match.match import Match, MatchSchema
 
+from rui_be.routes import ENDPOINT
+
 
 blueprint = Blueprint("matches", __name__)
 
 
-@blueprint.route("/api/1.6.0/matches", methods=["GET"])
+@blueprint.route(f"{ENDPOINT}/matches", methods=["GET"])
 def get_matches() -> Response:
     # Parse query params
 
