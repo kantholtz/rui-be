@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import re
 import logging
 from dataclasses import asdict
 
 from draug.homag import graph
 from draug.homag import sampling
-from draug.homag.model import PID
 
 from rui_be import state
 from rui_be import changelog
@@ -17,6 +17,7 @@ from rui_be.models.nodes import Node
 from rui_be.models.predictions import Annotation
 from rui_be.models.predictions import Prediction
 from rui_be.models.predictions import Predictions
+from rui_be.models.predictions import FilterRequest
 
 from flask import Blueprint, Response, request, jsonify
 
@@ -155,16 +156,51 @@ def ann_prediction(pid: int) -> Response:
     changelog.append(
         kind=changelog.Kind.PRED_ANN,
         data={
+            "request": asdict(req),
             "prediction": asdict(pred),
-            "node": state.graph.nxg.nodes[nid],
+            "node": dict(state.graph.nxg.nodes[nid]),
             "matches": [asdict(match) for match in handler.matches],
+            "removed": [asdict(pred) for pred in removed],
         },
     )
 
     return {"removed": [pred.pid for pred in removed]}
 
 
-@blueprint.route(f"{ENDPOINT}/predictions/<int:pid>/dismiss", methods=["POST"])
+@blueprint.route(f"{ENDPOINT}/predictions/<int:pid>/filter", methods=["POST"])
 def dis_prediction(pid: int) -> Response:
-    # TODO
-    return ""
+    req: FilterRequest = FilterRequest.Schema().load(request.get_json())
+
+    rel = graph.Graph.RELATIONS[req.relation]
+    pred = state.predictions_store.by_pid(pid=pid)
+    preds = state.predictions_store.by_nid(req.nid)[rel]
+
+    log.info(f"filtering {req.phrase} from {len(preds)} predictions for {req.nid=}")
+
+    regex = re.compile(".+".join(req.phrase.split()).lower())
+    log.info(f"created regex: {regex}")
+
+    removed = {pred}
+    for pred in preds:
+        if regex.search(pred.context.lower()):
+            removed.add(pred)
+
+    for pred in removed:
+        state.predictions_store.del_prediction(pid=pred.pid)
+
+    log.info(f"matched and removed {len(removed)} predictions in total")
+
+    # --
+
+    changelog.append(
+        kind=changelog.Kind.PRED_FILTER,
+        data={
+            "request": asdict(req),
+            "regex": str(regex),
+            "node": dict(state.graph.nxg.nodes[req.nid]),
+            "prediction": asdict(pred),
+            "removed": [asdict(pred) for pred in removed],
+        },
+    )
+
+    return {"removed": [pred.pid for pred in removed]}

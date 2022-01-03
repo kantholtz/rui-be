@@ -7,6 +7,8 @@ from marshmallow import fields, post_load
 from rui_be.models.nodes import Node
 from rui_be.models.camel_case_schema import CamelCaseSchema
 
+from draug.homag.graph import NID
+from draug.homag.model import PID
 from draug.homag import model as draug
 
 
@@ -30,7 +32,7 @@ class Prediction:
 
     # --
 
-    pid: int
+    pid: PID
 
     score: float
     score_norm: float
@@ -92,5 +94,25 @@ class Annotation:
             return Annotation(**data)
 
     nid: int
+    relation: str
+    phrase: str
+
+
+@dataclass
+class FilterRequest:
+
+    # --
+
+    class Schema(CamelCaseSchema):
+
+        nid = fields.Integer(required=True)
+        relation = fields.String(required=True)
+        phrase = fields.String(required=True)
+
+        @post_load
+        def make_obj(self, data, **kwargs) -> "FilterRequest":
+            return FilterRequest(**data)
+
+    nid: NID
     relation: str
     phrase: str

@@ -22,6 +22,7 @@ class Kind(enum.Enum):
 
     PRED_DEL = "delete prediction"
     PRED_ANN = "annotate prediction"
+    PRED_FILTER = "filter prediction"
 
 
 def append(kind: Kind, data: dict):
