@@ -4,8 +4,12 @@ import logging
 import logging.config
 from pathlib import Path
 
+
+ROOT = Path(__file__).parent.parent
+
+
 # TODO hard coded path
-path = Path(__file__).parent.parent / "conf" / "logging.yaml"
+path = ROOT / "conf" / "logging.yaml"
 with path.open(mode="r") as fd:
     config = yaml.load(fd, Loader=yaml.FullLoader)
 
