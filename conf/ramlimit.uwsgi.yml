@@ -1,0 +1,7 @@
+uwsgi:
+  http-socket: 0.0.0.0:5000
+  manage-script-name: 1
+  mount: /=rui_be.app:create_app()
+  static-map: /=../rui-fe/dist
+  logto: data/uwsgi.log
+

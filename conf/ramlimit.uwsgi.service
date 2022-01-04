@@ -1,0 +1,15 @@
+# install to /etc/systemd/system/
+
+[Unit]
+Description=RUI UWSGI
+After=network.target
+
+[Service]
+User=rui
+Group=rui
+WorkingDirectory=/home/rui/rui-be
+ExecStart=/home/rui/rui-be/run_prod.sh
+Environment=PATH=/home/rui/conda/envs/rui/bin:/home/rui/conda/condabin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+[Install]
+WantedBy=multi-user.target
