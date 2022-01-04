@@ -126,6 +126,7 @@ def ann_prediction(pid: int) -> Response:
 
     log.info("running the matcher")
     sampling.match(
+        state.nlp,
         entities={ent.eid: ent},
         yielder=yielder,
         handler=handler,
