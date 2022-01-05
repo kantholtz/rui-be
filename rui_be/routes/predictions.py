@@ -144,8 +144,11 @@ def ann_prediction(pid: int) -> Response:
 
     removed = set()
     for pid in {pid} | {match.identifier for match in handler.matches}:
-        removed.add(state.predictions_store.by_pid(pid=pid))
-        state.predictions_store.del_prediction(pid=pid)
+        try:
+            removed.add(state.predictions_store.by_pid(pid=pid))
+            state.predictions_store.del_prediction(pid=pid)
+        except KeyError:
+            log.error("ann_prediction: {pid=} already gone!")
 
     # update matches
 
