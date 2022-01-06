@@ -3,6 +3,8 @@
 import enum
 import logging
 
+from rui_be import state
+
 
 # special log message upon application start
 changelog = logging.getLogger("changelog")
@@ -28,3 +30,4 @@ class Kind(enum.Enum):
 def append(kind: Kind, data: dict):
     # it uses repr() for dicts - needs to be implemented for custom objects
     changelog.info(data | {"kind": kind.value})
+    state.graphwriter.write((repr(state.graph) + "\n").encode())

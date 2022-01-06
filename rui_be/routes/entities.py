@@ -25,11 +25,14 @@ def post_entity() -> tuple[str, int]:
         ent=draug.homag.graph.Entity(name=req.name),
     )
 
+    ent = state.graph.get_entity(eid=eid)
+
     changelog.append(
         kind=changelog.Kind.ENTITY_ADD,
         data={
             "nid": req.nid,
-            "entity": asdict(state.graph.get_entity(eid=eid)),
+            "entity": asdict(ent),
+            "node": dict(state.graph.nxg.nodes[ent.nid]),
         },
     )
 
@@ -47,6 +50,7 @@ def delete_entity(eid: int) -> str:
         data={
             "eid": eid,
             "entity": asdict(ent),
+            "node": dict(state.graph.nxg.nodes[ent.nid]),
         },
     )
 

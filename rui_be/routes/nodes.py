@@ -75,6 +75,7 @@ def post_node() -> tuple[str, int]:
     return "", 201
 
 
+# currently unused (???)
 @blueprint.route(f"{ENDPOINT}/nodes/<int:nid>", methods=["PATCH"])
 def patch_node(nid: int) -> str:
     req: NodePatch = NodePatch.Schema().load(request.get_json())
@@ -88,7 +89,10 @@ def patch_node(nid: int) -> str:
 
     changelog.append(
         kind=changelog.Kind.NODE_CNG,
-        data={"request": asdict(req)},
+        data={
+            "request": asdict(req),
+            "node": state.graph.nxg.nodes[nid],
+        },
     )
 
     return ""
@@ -102,6 +106,7 @@ def delete_node(nid: int) -> str:
         kind=changelog.Kind.NODE_DEL,
         data={
             "nid": nid,
+            "node": state.graph.nxg.nodes[nid],
             "deleted_nids": nids,
         },
     )

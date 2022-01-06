@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import yaml
+import gzip
 import logging
 import zipfile
 import tempfile
@@ -63,11 +64,27 @@ def extract_zip(source_file, target_path):
     log.info(f"-- {state.matches_store}")
     log.info(f"-- {state.predictions_store}")
 
+    state.meta = meta
+
+    # --
+
+    timestamp = datetime.now().isoformat()
+    graph_fname = f'{meta["name"]}-{timestamp}.gz'.replace(" ", "_")
+
+    graph_path = Path("data/graphs")
+    graph_path.mkdir(exist_ok=True, parents=True)
+
+    log.info(f"writing graph iterations to {graph_path / graph_fname}")
+    state.graphwriter = gzip.open(graph_path / graph_fname, mode="w")
+
+    # --
+
     changelog.append(
         kind=changelog.Kind.STATE_INIT,
         data={
             "meta": meta,
             "prediction_config": predictions_config,
+            "graphs": str(graph_path / graph_fname),
         },
     )
 

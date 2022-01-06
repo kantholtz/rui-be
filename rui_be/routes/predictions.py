@@ -118,6 +118,7 @@ def ann_prediction(pid: int) -> Response:
 
     if req.relation == "parent":
         nid = state.graph.add_node(entities=[ent])
+        state.graph.set_parent(nid, req.nid)
 
     # run matcher
 
@@ -148,7 +149,7 @@ def ann_prediction(pid: int) -> Response:
             removed.add(state.predictions_store.by_pid(pid=pid))
             state.predictions_store.del_prediction(pid=pid)
         except KeyError:
-            log.error("ann_prediction: {pid=} already gone!")
+            log.error(f"ann_prediction: {pid=} already gone!")
 
     # update matches
 
