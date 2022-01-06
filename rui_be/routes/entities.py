@@ -32,7 +32,7 @@ def post_entity() -> tuple[str, int]:
         data={
             "nid": req.nid,
             "entity": asdict(ent),
-            "node": dict(state.graph.nxg.nodes[ent.nid]),
+            "node": state.graph.node_repr(nid=ent.nid),
         },
     )
 
@@ -50,7 +50,7 @@ def delete_entity(eid: int) -> str:
         data={
             "eid": eid,
             "entity": asdict(ent),
-            "node": dict(state.graph.nxg.nodes[ent.nid]),
+            "node": state.graph.node_repr(nid=ent.nid),
         },
     )
 

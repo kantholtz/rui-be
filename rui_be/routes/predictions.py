@@ -86,7 +86,10 @@ def del_prediction(pid: int) -> Response:
 
     changelog.append(
         kind=changelog.Kind.PRED_DEL,
-        data={"prediction": asdict(pred)},
+        data={
+            "prediction": asdict(pred),
+            "node": state.graph.node_repr(nid=pred.nid),
+        },
     )
 
     return ""
@@ -99,10 +102,12 @@ def del_prediction(pid: int) -> Response:
 def ann_prediction(pid: int) -> Response:
 
     req: Annotation = Annotation.Schema().load(request.get_json())
-    log.info(f"got {req.relation} annotation for {req.nid=} {pid=}: {req.phrase}")
+
+    log.info(f"got {req.relation} annotation for [{req.nid=}] {pid=}: {req.phrase}")
+    log.info(f"predicted was a {req.predicted_relation} for [{req.predicted_nid}]")
+    log.info(f"prediction is specific: {req.specific}")
 
     rel = graph.Graph.RELATIONS[req.relation]
-
     pred = state.predictions_store.by_pid(pid=pid)
     preds = state.predictions_store.by_nid(nid=req.nid)[rel]
 
@@ -163,9 +168,11 @@ def ann_prediction(pid: int) -> Response:
         data={
             "request": asdict(req),
             "prediction": asdict(pred),
-            "node": dict(state.graph.nxg.nodes[nid]),
+            "node": state.graph.node_repr(nid=nid),
             "matches": [asdict(match) for match in handler.matches],
             "removed": [asdict(pred) for pred in removed],
+            "predicted_node": state.graph.node_repr(nid=req.predicted_nid),
+            "predicted_relation": req.predicted_relation,
         },
     )
 
@@ -202,7 +209,7 @@ def dis_prediction(pid: int) -> Response:
         data={
             "request": asdict(req),
             "regex": str(regex),
-            "node": dict(state.graph.nxg.nodes[req.nid]),
+            "node": state.graph.node_repr(nid=req.nid),
             "prediction": asdict(pred),
             "removed": [asdict(pred) for pred in removed],
         },

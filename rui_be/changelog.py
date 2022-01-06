@@ -26,8 +26,12 @@ class Kind(enum.Enum):
     PRED_ANN = "annotate prediction"
     PRED_FILTER = "filter prediction"
 
+    TRACKING_ROUTE = "route tracking"
+
 
 def append(kind: Kind, data: dict):
     # it uses repr() for dicts - needs to be implemented for custom objects
     changelog.info(data | {"kind": kind.value})
-    state.graphwriter.write((repr(state.graph) + "\n").encode())
+
+    if state.graphwriter is not None:
+        state.graphwriter.write((repr(state.graph) + "\n").encode())

@@ -11,6 +11,7 @@ from rui_be.routes.matches import blueprint as matches
 from rui_be.routes.nodes import blueprint as nodes
 from rui_be.routes.predictions import blueprint as predictions
 from rui_be.routes.upload import blueprint as upload
+from rui_be.routes.tracking import blueprint as tracking
 
 
 def main():
@@ -37,5 +38,6 @@ def create_app(config=None) -> Flask:
     app.register_blueprint(nodes)
     app.register_blueprint(predictions)
     app.register_blueprint(upload)
+    app.register_blueprint(tracking)
 
     return app

@@ -89,6 +89,11 @@ class Annotation:
         relation = fields.String(required=True)
         phrase = fields.String(required=True)
 
+        predicted_nid = fields.Integer(required=True)
+        predicted_relation = fields.String(required=True)
+
+        specific = fields.Boolean(required=True)
+
         @post_load
         def make_obj(self, data, **kwargs) -> "Annotation":
             return Annotation(**data)
@@ -96,6 +101,11 @@ class Annotation:
     nid: int
     relation: str
     phrase: str
+
+    predicted_nid: int
+    predicted_relation: str
+
+    specific: bool
 
 
 @dataclass

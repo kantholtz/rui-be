@@ -60,14 +60,17 @@ def post_node() -> tuple[str, int]:
         entities=[draug.homag.graph.Entity(ent.name) for ent in req.entities]
     )
 
+    parent = None
     if req.pid is not None:
         state.graph.set_parent(nid, req.pid)
+        parent = state.graph.node_repr(nid=req.pid)
 
     changelog.append(
         kind=changelog.Kind.NODE_ADD,
         data={
             "nid": nid,
-            "node": state.graph.nxg.nodes[nid],
+            "node": state.graph.node_repr(nid=nid),
+            "parent": parent,
             "request": asdict(req),
         },
     )
@@ -75,12 +78,11 @@ def post_node() -> tuple[str, int]:
     return "", 201
 
 
-# currently unused (???)
+# currently unused?
 @blueprint.route(f"{ENDPOINT}/nodes/<int:nid>", methods=["PATCH"])
 def patch_node(nid: int) -> str:
     req: NodePatch = NodePatch.Schema().load(request.get_json())
 
-    # ????
     if req.pid is None and state.graph.get_parent(nid) is not None:
         state.graph.del_parent(nid)
 
@@ -91,7 +93,7 @@ def patch_node(nid: int) -> str:
         kind=changelog.Kind.NODE_CNG,
         data={
             "request": asdict(req),
-            "node": state.graph.nxg.nodes[nid],
+            "node": state.graph.node_repr(nid=nid),
         },
     )
 
@@ -100,13 +102,14 @@ def patch_node(nid: int) -> str:
 
 @blueprint.route(f"{ENDPOINT}/nodes/<int:nid>", methods=["DELETE"])
 def delete_node(nid: int) -> str:
+    node_rep = state.graph.node_repr(nid=nid)
     nids = state.graph.del_node(nid)
 
     changelog.append(
         kind=changelog.Kind.NODE_DEL,
         data={
             "nid": nid,
-            "node": state.graph.nxg.nodes[nid],
+            "node": node_rep,
             "deleted_nids": nids,
         },
     )
