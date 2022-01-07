@@ -47,6 +47,9 @@ class DeepNode:
         entities = fields.List(fields.Nested(Entity.Schema), required=True)
         children = fields.List(fields.Nested(lambda: DeepNode.Schema()), required=True)
 
+        synonymPredictions = fields.Integer(required=True)
+        childPredictions = fields.Integer(required=True)
+
         @post_load
         def make_obj(self, data, **kwargs) -> "DeepNode":
             return DeepNode(**data)
@@ -59,6 +62,9 @@ class DeepNode:
 
     entities: list[Entity]
     children: list["DeepNode"]
+
+    synonymPredictions: int
+    childPredictions: int
 
 
 @dataclass

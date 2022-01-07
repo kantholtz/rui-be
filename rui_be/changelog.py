@@ -3,9 +3,6 @@
 import enum
 import logging
 
-from rui_be import state
-
-
 # special log message upon application start
 changelog = logging.getLogger("changelog")
 changelog.info("! initialized changelog")
@@ -29,7 +26,7 @@ class Kind(enum.Enum):
     TRACKING_ROUTE = "route tracking"
 
 
-def append(kind: Kind, data: dict):
+def append(state, kind: Kind, data: dict):
     # it uses repr() for dicts - needs to be implemented for custom objects
     changelog.info(data | {"kind": kind.value})
 

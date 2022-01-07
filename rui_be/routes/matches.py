@@ -1,6 +1,6 @@
 from flask import Blueprint, Response, request, jsonify
 
-from rui_be import state
+from rui_be.state import ctx
 from rui_be.models.match.match import Match, MatchSchema
 
 from rui_be.routes import ENDPOINT
@@ -25,17 +25,18 @@ def get_matches() -> Response:
 
     # Get matches from draug and apply pagination
 
-    draug_matches = state.matches_store.by_eid(entity)
-    matches: list[Match] = [
-        Match(m.eid, m.identifier, m.context, m.mention, list(m.mention_idxs))
-        for m in draug_matches
-    ]
+    with ctx as state:
+        draug_matches = state.matches_store.by_eid(entity)
+        matches: list[Match] = [
+            Match(m.eid, m.identifier, m.context, m.mention, list(m.mention_idxs))
+            for m in draug_matches
+        ]
 
-    if offset and limit:
-        matches = matches[offset : (offset + limit)]
-    elif offset:
-        matches = matches[offset:]
-    elif limit:
-        matches = matches[:limit]
+        if offset and limit:
+            matches = matches[offset : (offset + limit)]
+        elif offset:
+            matches = matches[offset:]
+        elif limit:
+            matches = matches[:limit]
 
-    return jsonify(MatchSchema(many=True).dump(matches))
+        return jsonify(MatchSchema(many=True).dump(matches))

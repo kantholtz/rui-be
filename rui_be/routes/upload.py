@@ -18,7 +18,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 import rui_be
-from rui_be import state
+from rui_be.state import ctx
 from rui_be import changelog
 
 from rui_be.routes import ENDPOINT
@@ -40,53 +40,55 @@ def extract_zip(source_file, target_path):
     with (path / "meta.yml").open(mode="r") as fd:
         meta = yaml.load(fd, Loader=yaml.FullLoader)
 
-    # graph
-    state.graph = Graph.from_dir(path=path / "graph")
+    with ctx as state:
+        # graph
+        state.graph = Graph.from_dir(path=path / "graph")
 
-    # matches
-    state.matches_store = Matches.from_file(
-        path=path / "matches" / "match.txt",
-        graph=state.graph,
-    )
+        # matches
+        state.matches_store = Matches.from_file(
+            path=path / "matches" / "match.txt",
+            graph=state.graph,
+        )
 
-    # predictions
-    with (path / "predictions" / "ranking.config.yml").open(mode="r") as fd:
-        predictions_config = yaml.load(fd, Loader=yaml.FullLoader)
+        # predictions
+        with (path / "predictions" / "ranking.config.yml").open(mode="r") as fd:
+            predictions_config = yaml.load(fd, Loader=yaml.FullLoader)
 
-    state.predictions_store = Predictions.from_files(
-        path / "predictions" / "parent.csv",
-        path / "predictions" / "synonym.csv",
-    )
+        state.predictions_store = Predictions.from_files(
+            path / "predictions" / "parent.csv",
+            path / "predictions" / "synonym.csv",
+        )
 
-    # --
+        # --
 
-    log.info(f"state populated with {state.graph}")
-    log.info(f"-- {state.matches_store}")
-    log.info(f"-- {state.predictions_store}")
+        log.info(f"state populated with {state.graph}")
+        log.info(f"-- {state.matches_store}")
+        log.info(f"-- {state.predictions_store}")
 
-    state.meta = meta
+        state.meta = meta
 
-    # --
+        # --
 
-    timestamp = datetime.now().isoformat()
-    graph_fname = f'{meta["name"]}-{timestamp}.gz'.replace(" ", "_")
+        timestamp = datetime.now().isoformat()
+        graph_fname = f'{meta["name"]}-{timestamp}.gz'.replace(" ", "_")
 
-    graph_path = Path("data/graphs")
-    graph_path.mkdir(exist_ok=True, parents=True)
+        graph_path = Path("data/graphs")
+        graph_path.mkdir(exist_ok=True, parents=True)
 
-    log.info(f"writing graph iterations to {graph_path / graph_fname}")
-    state.graphwriter = gzip.open(graph_path / graph_fname, mode="w")
+        log.info(f"writing graph iterations to {graph_path / graph_fname}")
+        state.graphwriter = gzip.open(graph_path / graph_fname, mode="w")
 
-    # --
+        # --
 
-    changelog.append(
-        kind=changelog.Kind.STATE_INIT,
-        data={
-            "meta": meta,
-            "prediction_config": predictions_config,
-            "graphs": str(graph_path / graph_fname),
-        },
-    )
+        changelog.append(
+            state=state,
+            kind=changelog.Kind.STATE_INIT,
+            data={
+                "meta": meta,
+                "prediction_config": predictions_config,
+                "graphs": str(graph_path / graph_fname),
+            },
+        )
 
 
 @blueprint.route(f"{ENDPOINT}/upload", methods=["PUT"])
