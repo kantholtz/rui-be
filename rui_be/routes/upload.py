@@ -11,7 +11,7 @@ from pathlib import Path
 
 from draug.homag.graph import Graph
 from draug.homag.text import Matches
-from draug.homag.model import Predictions
+from draug.models.ranking import Predictions
 
 from flask import Blueprint, request
 from werkzeug.datastructures import FileStorage
@@ -112,7 +112,7 @@ def put_upload() -> str:
 
 def _get_available():
     path = rui_be.ROOT / "data" / "storage"
-    return list(path.glob("*zip"))
+    return list(path.glob("model-*"))
 
 
 @blueprint.route(f"{ENDPOINT}/uploads", methods=["GET"])
@@ -124,7 +124,8 @@ def get_uploads() -> str:
             {
                 "name": glob.name,
                 "created": datetime.fromtimestamp(stats.st_mtime),
-                "size": int(stats.st_size / 1024 ** 2),  # MB
+                "size": -1,
+                # "size": int(stats.st_size / 1024 ** 2),  # MB
             }
         )
 
@@ -141,8 +142,67 @@ def post_init() -> str:
     if name not in available:
         return "", 500
 
-    with tempfile.TemporaryDirectory() as extract_dir:
-        target_path = Path(extract_dir)
-        extract_zip(source_file=available[name], target_path=target_path)
+    # with tempfile.TemporaryDirectory() as extract_dir:
+    #     target_path = Path(extract_dir)
+    #     extract_zip(source_file=available[name], target_path=target_path)
+
+    path = available[name]
+    log.info("populating state")
+
+    # meta
+    with (path / "meta.yml").open(mode="r") as fd:
+        meta = yaml.load(fd, Loader=yaml.FullLoader)
+
+    with ctx as state:
+        # graph
+        state.graph = Graph.from_dir(path=path / "graph")
+
+        # matches
+        state.matches_store = Matches.from_file(
+            path=path / "matches" / "match.txt",
+            graph=state.graph,
+        )
+
+        # predictions
+
+        with (path / "predictions" / "config.yml").open(mode="r") as fd:
+            ranking_config = yaml.load(fd, Loader=yaml.FullLoader)
+
+        state.predictions_store = Predictions(
+            graph=state.graph,
+            preds_path=path / "predictions" / "predictions.txt.gz",
+            h5_path=path / "predictions" / "rankings.h5",
+            normalization=ranking_config["normalizer"],
+        )
+
+        # --
+
+        log.info(f"state populated with {state.graph}")
+        log.info(f"-- {state.matches_store}")
+        log.info(f"-- {state.predictions_store}")
+
+        state.meta = meta
+
+        # --
+
+        timestamp = datetime.now().isoformat()
+        graph_fname = f'{meta["name"]}-{timestamp}.gz'.replace(" ", "_")
+
+        graph_path = Path("data/graphs")
+        graph_path.mkdir(exist_ok=True, parents=True)
+
+        log.info(f"writing graph iterations to {graph_path / graph_fname}")
+        state.graphwriter = gzip.open(graph_path / graph_fname, mode="w")
+
+        # --
+
+        changelog.append(
+            state=state,
+            kind=changelog.Kind.STATE_INIT,
+            data={
+                "meta": meta,
+                "graphs": str(graph_path / graph_fname),
+            },
+        )
 
     return ""
