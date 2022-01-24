@@ -4,10 +4,12 @@ from threading import RLock
 
 from draug.homag import sampling
 from draug.homag.graph import Graph
-from draug.homag.model import Predictions
 from draug.homag.text import Matches
+from draug.models.ranking import Predictions
 
 import logging
+
+from typing import BinaryIO
 
 log = logging.getLogger(__name__)
 
@@ -17,26 +19,35 @@ log = logging.getLogger(__name__)
 
 
 class State:
+
+    meta: dict
+    graph: Graph
+    graphwriter: BinaryIO
+
+    matches_store: Matches
+    predictions_store: Predictions
+
     def __init__(self):
         log.info("initializing state")
 
         self.meta = None
+
+        self.graph = Graph(meta=dict(name="Default"))
         self.graphwriter = None
-        self.graph = Graph(meta=dict(name="unknown"))
-        self.matches_store = Matches(self.graph)
-        self.predictions_store = Predictions()
+
+        self.matches_store = None
+        self.predictions_store = None
+
         self.nlp = sampling.get_nlp()
 
         self._lock = RLock()
         log.info("initialized state")
 
     def __enter__(self):
-        log.info("acquire lock")
         self._lock.acquire()
         return self
 
     def __exit__(self, *args):
-        log.info("releasing lock")
         self._lock.release()
 
 
