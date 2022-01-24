@@ -26,6 +26,9 @@ log = logging.getLogger(__name__)
 blueprint = Blueprint("predictions", __name__)
 
 
+TOP_K_KWARGS = dict(k=20, norm=True, noskip=True)
+
+
 @blueprint.route(f"{ENDPOINT}/nodes/<int:nid>/predictions", methods=["GET"])
 def get_predictions(nid: int) -> Response:
 
@@ -60,7 +63,7 @@ def get_predictions(nid: int) -> Response:
 
         # retrieve and assemble data
 
-        draug_predictions = state.predictions_store.by_nid(nid=nid)
+        draug_predictions = state.predictions_store.top_k(nid=nid, **TOP_K_KWARGS)
 
         def create_predictions(rel: graph.Graph.RELATIONS):
             return [
@@ -80,18 +83,20 @@ def get_predictions(nid: int) -> Response:
 
 @blueprint.route(f"{ENDPOINT}/predictions/<int:pid>", methods=["DELETE"])
 def del_prediction(pid: int) -> Response:
+    nid = int(request.args.get("nid"))
+
     with ctx as state:
         log.info(f"deleting prediction: {pid}")
 
-        pred = state.predictions_store.by_pid(pid=pid)
+        pred = state.predictions_store.contexts[pid]
         state.predictions_store.del_prediction(pid=pid)
 
         changelog.append(
             state=state,
             kind=changelog.Kind.PRED_DEL,
             data={
-                "prediction": asdict(pred),
-                "node": state.graph.node_repr(nid=pred.nid),
+                "prediction": pred,
+                "node": state.graph.node_repr(nid=nid),
             },
         )
 
@@ -111,11 +116,11 @@ def ann_prediction(pid: int) -> Response:
 
         log.info(f"got {req.relation} annotation for [{req.nid=}] {pid=}: {req.phrase}")
         log.info(f"predicted was a {req.predicted_relation} for [{req.predicted_nid}]")
-        log.info(f"prediction is specific: {req.specific}")
+        # log.info(f"prediction is specific: {req.specific}")
 
         rel = graph.Graph.RELATIONS[req.relation]
-        pred = state.predictions_store.by_pid(pid=pid)
-        preds = state.predictions_store.by_nid(nid=req.nid)[rel]
+        pred = state.predictions_store.contexts[pid]
+        preds = state.predictions_store.top_k(nid=req.nid, **TOP_K_KWARGS)[rel]
 
         log.info(f"retrieved prediction {pid} (total: {len(preds)} predictions)")
 
@@ -133,7 +138,10 @@ def ann_prediction(pid: int) -> Response:
 
         # run matcher
 
-        yielder = ((pred.context, {"identifier": pred.pid}) for pred in preds[:LIMIT])
+        log.error("matcher deactivated (!)")
+
+        #  for pred in preds[:LIMIT])
+        yielder = ((pred.context, {"identifier": pred.pid}) for pred in [])
         handler = sampling.SimpleHandler()
 
         log.info("running the matcher")
@@ -157,7 +165,7 @@ def ann_prediction(pid: int) -> Response:
         removed = set()
         for pid in {pid} | {match.identifier for match in handler.matches}:
             try:
-                removed.add(state.predictions_store.by_pid(pid=pid))
+                removed.add(pid)
                 state.predictions_store.del_prediction(pid=pid)
             except KeyError:
                 log.error(f"ann_prediction: {pid=} already gone!")
@@ -174,16 +182,16 @@ def ann_prediction(pid: int) -> Response:
             kind=changelog.Kind.PRED_ANN,
             data={
                 "request": asdict(req),
-                "prediction": asdict(pred),
+                "prediction": pred,
                 "node": state.graph.node_repr(nid=nid),
                 "matches": [asdict(match) for match in handler.matches],
-                "removed": [asdict(pred) for pred in removed],
+                "removed": list(removed),
                 "predicted_node": state.graph.node_repr(nid=req.predicted_nid),
                 "predicted_relation": req.predicted_relation,
             },
         )
 
-        return {"removed": [pred.pid for pred in removed]}
+        return {"removed": list(removed)}
 
 
 @blueprint.route(f"{ENDPOINT}/predictions/<int:pid>/filter", methods=["POST"])
@@ -192,21 +200,22 @@ def dis_prediction(pid: int) -> Response:
         req: FilterRequest = FilterRequest.Schema().load(request.get_json())
 
         rel = graph.Graph.RELATIONS[req.relation]
-        pred = state.predictions_store.by_pid(pid=pid)
-        preds = state.predictions_store.by_nid(req.nid)[rel]
+        preds = state.predictions_store.top_k(nid=req.nid, **TOP_K_KWARGS)[rel]
 
         log.info(f"filtering {req.phrase} from {len(preds)} predictions for {req.nid=}")
 
         regex = re.compile(".+".join(req.phrase.split()).lower())
         log.info(f"created regex: {regex}")
 
-        removed = {pred}
+        removed = {pid}
         for pred in preds:
             if regex.search(pred.context.lower()):
-                removed.add(pred)
+                removed.add(pred.pid)
 
-        for pred in removed:
-            state.predictions_store.del_prediction(pid=pred.pid)
+        removed_contexts = []
+        for pid in removed:
+            removed_contexts.append(state.predictions_store.contexts[pid])
+            state.predictions_store.del_prediction(pid=pid)
 
         log.info(f"matched and removed {len(removed)} predictions in total")
 
@@ -220,8 +229,8 @@ def dis_prediction(pid: int) -> Response:
                 "regex": str(regex),
                 "node": state.graph.node_repr(nid=req.nid),
                 "prediction": asdict(pred),
-                "removed": [asdict(pred) for pred in removed],
+                "removed": removed_contexts,
             },
         )
 
-        return {"removed": [pred.pid for pred in removed]}
+        return {"removed": list(removed)}

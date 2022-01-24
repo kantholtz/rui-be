@@ -92,7 +92,7 @@ class Annotation:
         predicted_nid = fields.Integer(required=True)
         predicted_relation = fields.String(required=True)
 
-        specific = fields.Boolean(required=True)
+        # specific = fields.Boolean(required=True)
 
         @post_load
         def make_obj(self, data, **kwargs) -> "Annotation":
@@ -105,7 +105,7 @@ class Annotation:
     predicted_nid: int
     predicted_relation: str
 
-    specific: bool
+    # specific: bool
 
 
 @dataclass
